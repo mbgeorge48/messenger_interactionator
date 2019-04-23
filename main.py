@@ -3,6 +3,7 @@ import re
 import collections
 
 FILENAME = "message.json"
+YOURNAME = "Matt George"
 
 
 def load_json():
@@ -54,8 +55,35 @@ def main():
     json_string = load_json()
     participants = get_participants(json_string['participants'])
     all_nicknames = get_nicknames(json_string['messages'], participants)
-    # once all the nicknames are returned search the values for participants
-    # after that you need to pull the nickname out
+
+    peoples_nicknames = collections.defaultdict(list)
+    nickname_regex = "^.*?set.*?nickname.*?to "
+
+    # Not idea code but will clean up later
+
+    for item in (all_nicknames["you_set_someones_nickname"]):
+        nickname = re.sub(nickname_regex, "", item[1])
+        for person in participants:
+            if person in item[1]:
+                peoples_nicknames[person].append(nickname)
+
+    for item in (all_nicknames["someone_set_their_own_nickname"]):
+        nickname = re.sub(nickname_regex, "", item[1])
+        for person in participants:
+            if person in item[1]:
+                peoples_nicknames[person].append(nickname)
+
+    for item in (all_nicknames["someone_set_someones_nickname"]):
+        nickname = re.sub(nickname_regex, "", item[1])
+        for person in participants:
+            if person in item[1]:
+                peoples_nicknames[person].append(nickname)
+
+    for item in (all_nicknames["someone_set_your_nickname"]):
+        nickname = re.sub(nickname_regex, "", item[1])
+        peoples_nicknames[YOURNAME].append(nickname)
+
+    print(peoples_nicknames[participants[1]])
 
 
 if __name__ == '__main__':

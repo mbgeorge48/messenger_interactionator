@@ -2,7 +2,7 @@ import time
 import json
 import re
 
-YOUR_NAME = "MG"
+YOUR_NAME = "Matt George"
 
 
 class nickname_event():
@@ -67,8 +67,6 @@ class process_nicknames():
             # print(event.msg_content)
 
     def parse_nickname_events(self):
-        # Need to split it out so I can get the settie and the actual nickname out
-        regex_pattern_a = "^.*? for .*? to .*?"
         # Need to split the message content up, chuck everything before "for" in the bin
 
         nickname_patterns = [  # Need one for one's you set for yourself
@@ -78,51 +76,49 @@ class process_nicknames():
             "^.*?set the nickname for .*?"
         ]
         for event in self.nickname_list:
-            message_split = event.msg_content.split()
-            if re.match(nickname_patterns[0], event.msg_content) is not None:
-                self.someone_set_your_nickname(message_split)
-            if re.match(nickname_patterns[1], event.msg_content) is not None:
-                self.you_set_someones_nickname(message_split)
-            if re.match(nickname_patterns[2], event.msg_content) is not None:
-                self.someone_set_their_own_nickname(message_split)
-            if re.match(nickname_patterns[3], event.msg_content) is not None:
-                self.someone_set_someones_nickname(message_split)
+            message = event.msg_content
+            setter = event.setter
+            if re.match(nickname_patterns[0], message) is not None:
+                settie, nickname = self.someone_set_your_nickname(message)
+            elif re.match(nickname_patterns[1], message) is not None or re.match(nickname_patterns[3], message) is not None:
+                settie, nickname = self.set_someones_nickname(message)
+            elif re.match(nickname_patterns[2], message) is not None:
+                settie, nickname = self.someone_set_their_own_nickname(
+                    message, setter)
 
-        # for event in self.nickname_list:
-        #     print(event.msg_content)
-        #     message_split = event.msg_content.split()
-        #     if "set the nickname for" in message_split:
-        #         split = message_split.index("set the nickname for")
-        #         print(split, len(message_split))
-        #         if split > len(message_split):
-        #             settie = YOUR_NAME
-        #         else:
-        #             settie = message_split[split+1] + \
-        #                 " " + message_split[split+2]
-        #         split = message_split.index("to")
-        #         nickname = " ".join(message_split[split+1:])
-        #     print(settie, nickname[nickname.find(
-        #         settie + " to "):].replace(settie + " to ", "")[:-1])
+            print(setter, settie, nickname, event.timestamp)
 
-    def someone_set_your_nickname(self, message_split):
-        print("a")
+    def someone_set_your_nickname(self, message):
+        settie = YOUR_NAME
+        message_split = message.split()
+        split = message_split.index("to")
+        while split in message_split:
+            if message_split[split-1] != "nickname":
+                message_split.remove("to")
+            else:
+                break
+        nickname = " ".join(message_split[split+1:])
+        return settie, nickname[:-1]
 
-    def you_set_someones_nickname(self, message_split):
+    def someone_set_their_own_nickname(self, message, setter):
+        settie = setter
+        message_split = message.split()
+
+        split = message_split.index("to")
+        while split in message_split:
+            if message_split[split-1] != "nickname":
+                message_split.remove("to")
+            else:
+                break
+        nickname = " ".join(message_split[split+1:])
+        return settie, nickname[:-1]
+
+    def set_someones_nickname(self, message):
+        message_split = message.split()
         split = message_split.index("for")
         settie = message_split[split+1] + " " + message_split[split+2]
         nickname = " ".join(message_split[split+1:])
-        print(settie, "===", nickname[nickname.find(
-            settie + " to "):].replace(settie + " to ", "")[:-1])
-
-    def someone_set_their_own_nickname(self, message_split):
-        print("c")
-
-    def someone_set_someones_nickname(self, message_split):
-        split = message_split.index("for")
-        settie = message_split[split+1] + " " + message_split[split+2]
-        nickname = " ".join(message_split[split+1:])
-        print(settie, "===", nickname[nickname.find(
-            settie + " to "):].replace(settie + " to ", "")[:-1])
+        return settie, nickname[nickname.find(settie + " to "):].replace(settie + " to ", "")[:-1]
 
 
 test = process_nicknames()

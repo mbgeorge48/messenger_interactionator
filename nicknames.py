@@ -5,14 +5,14 @@ import re
 YOUR_NAME = "Matt George"
 
 
-class nickname_event():
+class nickname_message():
     def __init__(self, timestamp, setter, msg_content):
         self.timestamp = timestamp
         self.setter = setter
         self.msg_content = msg_content
 
 
-class nickname():
+class nickname_event():
     def __init__(self, setter, settie, timestamp, nickname):
         self.setter = setter
         self.settie = settie
@@ -31,9 +31,10 @@ class participant():
 
 class process_nicknames():
     FILENAME = "message.json"
-    json_string = None
-    participants = list()  # Will contain a list of participant objects
+    participants = list()
     nickname_list = list()
+    processed_nicknames = list()
+    processed_participants = list()
 
     def __init__(self):
         welcome_message = "Hello and welcome to the nickname parser"
@@ -42,7 +43,10 @@ class process_nicknames():
         self.load_json_export()
         self.get_participant_names()
         self.get_all_nickname_updates()
-        self.parse_nickname_events()
+        self.parse_nickname_messages()
+
+        for person in self.participants:
+            self.process_participants(person)
 
     def load_json_export(self):
         with open(self.FILENAME) as json_data:
@@ -58,17 +62,12 @@ class process_nicknames():
         for message in self.json_string['messages']:
             try:  # Need to catch as I found that not all messages have content
                 if re.match(main_pattern, message["content"]) is not None:
-                    self.nickname_list.append(nickname_event(
+                    self.nickname_list.append(nickname_message(
                         message['timestamp_ms'], message['sender_name'], message['content']))
             except:
                 pass
 
-        # for event in self.nickname_list:
-            # print(event.msg_content)
-
-    def parse_nickname_events(self):
-        # Need to split the message content up, chuck everything before "for" in the bin
-
+    def parse_nickname_messages(self):
         nickname_patterns = [  # Need one for one's you set for yourself
             "^.*?set your nickname to .*?",
             "^You set the nickname for .*?",
@@ -86,17 +85,17 @@ class process_nicknames():
                 settie, nickname = self.someone_set_their_own_nickname(
                     message, setter)
 
-            print(setter, settie, nickname, event.timestamp)
+            self.processed_nicknames.append(
+                nickname_event(setter, settie, event.timestamp, nickname))
 
     def someone_set_your_nickname(self, message):
         settie = YOUR_NAME
         message_split = message.split()
         split = message_split.index("to")
-        while split in message_split:
-            if message_split[split-1] != "nickname":
-                message_split.remove("to")
-            else:
-                break
+        while message_split[split-1] != "nickname":
+            print(message_split[split-1])
+            message_split.remove("to")
+            split = message_split.index("to")
         nickname = " ".join(message_split[split+1:])
         return settie, nickname[:-1]
 
@@ -105,11 +104,10 @@ class process_nicknames():
         message_split = message.split()
 
         split = message_split.index("to")
-        while split in message_split:
-            if message_split[split-1] != "nickname":
-                message_split.remove("to")
-            else:
-                break
+        while message_split[split-1] != "nickname":
+            print(message_split[split-1])
+            message_split.remove("to")
+            split = message_split.index("to")
         nickname = " ".join(message_split[split+1:])
         return settie, nickname[:-1]
 
@@ -117,8 +115,14 @@ class process_nicknames():
         message_split = message.split()
         split = message_split.index("for")
         settie = message_split[split+1] + " " + message_split[split+2]
+
         nickname = " ".join(message_split[split+1:])
         return settie, nickname[nickname.find(settie + " to "):].replace(settie + " to ", "")[:-1]
+
+    def process_participants(self, person):
+        for ne in self.processed_nicknames:
+            if ne.settie == person:
+                print(person, ne.nickname)
 
 
 test = process_nicknames()

@@ -1,4 +1,5 @@
 import time
+import datetime
 import json
 import re
 
@@ -16,7 +17,9 @@ class nickname_event():
     def __init__(self, setter, settie, timestamp, nickname):
         self.setter = setter
         self.settie = settie
-        self.timestamp_formated = time.ctime(timestamp)
+        # self.timestamp_formated = time.ctime(timestamp)
+        self.timestamp_formated = datetime.datetime.utcfromtimestamp(
+            timestamp/1000).strftime('%Y-%m-%d %H:%M:%S')
         self.nickname = nickname
 
 
@@ -34,7 +37,7 @@ class process_nicknames():
     participants = list()
     nickname_list = list()
     processed_nicknames = list()
-    processed_participants = list()
+    processed_participants = dict()
 
     def __init__(self):
         welcome_message = "Hello and welcome to the nickname parser"
@@ -46,7 +49,21 @@ class process_nicknames():
         self.parse_nickname_messages()
 
         for person in self.participants:
-            self.process_participants(person)
+            print(f"Processing {person}")
+            persons_nicknames = list()
+            for ne in self.processed_nicknames:
+                if ne.settie == person:
+                    persons_nicknames.append(self.process_participants(
+                        person, ne))
+            self.processed_participants[person] = {
+                "Nicknames": persons_nicknames,
+                "Number of nicknames": len(persons_nicknames)
+            }
+
+        print(json.dumps(self.processed_participants, sort_keys=True, indent=4))
+        with open('result.json', 'w') as fp:
+            json.dump(self.processed_participants, fp, indent=4,
+                      separators=(',', ': '), sort_keys=True)
 
     def load_json_export(self):
         with open(self.FILENAME) as json_data:
@@ -93,7 +110,6 @@ class process_nicknames():
         message_split = message.split()
         split = message_split.index("to")
         while message_split[split-1] != "nickname":
-            print(message_split[split-1])
             message_split.remove("to")
             split = message_split.index("to")
         nickname = " ".join(message_split[split+1:])
@@ -105,7 +121,6 @@ class process_nicknames():
 
         split = message_split.index("to")
         while message_split[split-1] != "nickname":
-            print(message_split[split-1])
             message_split.remove("to")
             split = message_split.index("to")
         nickname = " ".join(message_split[split+1:])
@@ -119,10 +134,21 @@ class process_nicknames():
         nickname = " ".join(message_split[split+1:])
         return settie, nickname[nickname.find(settie + " to "):].replace(settie + " to ", "")[:-1]
 
-    def process_participants(self, person):
-        for ne in self.processed_nicknames:
-            if ne.settie == person:
-                print(person, ne.nickname)
+    def process_participants(self, person, ne):
+        this_event = dict()
+
+        this_event["Nickname"] = ne.nickname
+        this_event["Setter"] = ne.setter
+        this_event["Timestamp"] = ne.timestamp_formated
+        return this_event
+
+        # need the format to look something like this
+        # {
+        # <name>:
+        # <nickname>:
+        # timestamp: <timestamp>
+        # setter: <setter>
+        # }
 
 
 test = process_nicknames()

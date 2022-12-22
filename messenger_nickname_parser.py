@@ -5,13 +5,9 @@ import datetime
 import sys
 import os
 
+from utils import load_json
+
 YOUR_NAME = "Matt George"
-
-def load_json(file_to_parse):
-    with open(file_to_parse) as json_data:
-        json_string = json.load(json_data)
-    return json_string
-
 
 def get_participants(json_string):
     participants = list()

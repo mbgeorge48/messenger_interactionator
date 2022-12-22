@@ -3,15 +3,12 @@ import re
 import collections
 import datetime
 
-FILENAME = "message.json"
-YOURNAME = "Matt George"
-
-UNICODE_NAME = unicode(YOURNAME, "utf-8")
-
+FILE_NAME = "/Users/mg/Documents/FB/merged/messages/inbox/cardiffbros_gxeispklsa/combined_messages.json"
+YOUR_NAME = "Matt George"
 
 
 def load_json():
-    with open(FILENAME) as json_data:
+    with open(FILE_NAME) as json_data:
         json_string = json.load(json_data)
     return json_string
 
@@ -60,15 +57,14 @@ def sort_nicknames(all_nicknames, participants):
     for key in all_nicknames.keys():
         for item in (all_nicknames[key]):
             this_set = {
-                "Nickname": (re.sub(nickname_regex, "", item[1]).rstrip('.')),
-                "Timestamp":(datetime.datetime.fromtimestamp(item[0]/1000).strftime('%Y-%m-%d %H:%M:%S'))
+                "nickname": (re.sub(nickname_regex, "", item[1].encode('latin1').decode('utf8')).rstrip('.')),
+                "timestamp":(datetime.datetime.fromtimestamp(item[0]/1000).strftime('%Y-%m-%d %H:%M:%S'))
             }
             for person in participants:
                 if person in item[1]:
                     peoples_nicknames[person].append(this_set)
-            
             if "someone_set_your_nickname" == key:
-                peoples_nicknames[UNICODE_NAME].append(this_set)
+                peoples_nicknames[YOUR_NAME].append(this_set)
 
     return peoples_nicknames
 
@@ -80,11 +76,10 @@ def main():
 
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
     for participant in peoples_nicknames.keys():
-        print  (participant,len(peoples_nicknames[participant]))
+        print(participant,len(peoples_nicknames[participant]))
 
-    with open('result.json', 'w') as fp:
-        json.dumps(peoples_nicknames, fp)
-        json.dump(peoples_nicknames, fp, indent=4, separators=(',', ': '), sort_keys=True)
+    with open('result.json', 'w') as f:
+        json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), sort_keys=True, ensure_ascii=False)
 
 
 if __name__ == '__main__':

@@ -2,13 +2,13 @@ import json
 import re
 import collections
 import datetime
+import sys
+import os
 
-FILE_NAME = "/Users/mg/Documents/FB/merged/messages/inbox/thirstycamels_dl-hpn_nsg/combined_messages.json"
 YOUR_NAME = "Matt George"
 
-
-def load_json():
-    with open(FILE_NAME) as json_data:
+def load_json(file_to_parse):
+    with open(file_to_parse) as json_data:
         json_string = json.load(json_data)
     return json_string
 
@@ -74,18 +74,25 @@ def sort_nicknames(all_nicknames, participants):
     return peoples_nicknames
 
 
-def main():
-    json_string = load_json()
+def main(file_to_parse):
+    json_string = load_json(file_to_parse)
     participants = get_participants(json_string['participants'])
     all_nicknames = get_nicknames(json_string['messages'], participants)
 
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
+
+    totals = {}
     for participant in peoples_nicknames.keys():
         print(participant,len(peoples_nicknames[participant]))
+        totals[participant] = len(peoples_nicknames[participant])
+    peoples_nicknames['totals'] = totals
 
     with open('result.json', 'w') as f:
         json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), sort_keys=True, ensure_ascii=False)
 
 
 if __name__ == '__main__':
-    main()
+    if os.path.isfile(sys.argv[1]):
+        main(sys.argv[1])
+    else:
+        print('Missing path to file')

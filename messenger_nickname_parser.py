@@ -87,7 +87,7 @@ def main(file_to_parse):
         totals[participant] = len(peoples_nicknames[participant])
     peoples_nicknames['totals'] = totals
 
-    with open('result.json', 'w') as f:
+    with open('nickname_results.json', 'w') as f:
         json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), sort_keys=True, ensure_ascii=False)
 
 

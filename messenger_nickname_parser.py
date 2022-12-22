@@ -3,7 +3,7 @@ import re
 import collections
 import datetime
 
-FILE_NAME = "/Users/mg/Documents/FB/merged/messages/inbox/cardiffbros_gxeispklsa/combined_messages.json"
+FILE_NAME = "/Users/mg/Documents/FB/merged/messages/inbox/thirstycamels_dl-hpn_nsg/combined_messages.json"
 YOUR_NAME = "Matt George"
 
 
@@ -26,7 +26,8 @@ def get_nicknames(json_string, participants):
         "someone_set_your_nickname": "^.*?set your nickname to .*?",
         "you_set_someones_nickname": "^You set the nickname for .*?",
         "someone_set_their_own_nickname": "^.*?set (his own|her own) nickname to .*?",
-        "someone_set_someones_nickname": "^.*?set the nickname for .*?"
+        "someone_set_someones_nickname": "^.*?set the nickname for .*?",
+        "you_set_your_own_nickname": "^You set your nickname to .*?"
     }
 
     nickname_details = dict()
@@ -47,6 +48,8 @@ def get_nicknames(json_string, participants):
             nicknames_sorted["someone_set_their_own_nickname"].append(item)
         elif re.match(nickname_patterns.get("someone_set_someones_nickname"), item[1]) is not None:
             nicknames_sorted["someone_set_someones_nickname"].append(item)
+        elif re.match(nickname_patterns.get("you_set_your_own_nickname"), item[1]) is not None:
+            nicknames_sorted["you_set_your_own_nickname"].append(item)
 
     return nicknames_sorted
 
@@ -64,6 +67,8 @@ def sort_nicknames(all_nicknames, participants):
                 if person in item[1]:
                     peoples_nicknames[person].append(this_set)
             if "someone_set_your_nickname" == key:
+                peoples_nicknames[YOUR_NAME].append(this_set)
+            if "you_set_your_own_nickname" == key:
                 peoples_nicknames[YOUR_NAME].append(this_set)
 
     return peoples_nicknames

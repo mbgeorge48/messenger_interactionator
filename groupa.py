@@ -23,7 +23,7 @@ def main(dirs_to_group):
                                 participants_list.append(participant)
                         this_groups_message_data.update({'participants': participants_list })
 
-                        this_groups_message_data.update({'messages': this_groups_message_data["messages"].extend(json_string["messages"]) })
+                        this_groups_message_data.update({'messages': this_groups_message_data["messages"]+json_string["messages"] })
 
 
             if this_groups_message_data:
@@ -31,6 +31,12 @@ def main(dirs_to_group):
                 for message in this_groups_message_data['messages']:
                     try:
                         message['content'] = encode_string(message['content'])
+                    except:
+                        continue
+                for message in this_groups_message_data['messages']:
+                    try:
+                        for photo in message['photos']:
+                            photo['uri'] = '/'.join(photo['uri'].split('/')[-2:])
                     except:
                         continue
                 this_groups_message_data.update({'messages': sorted(this_groups_message_data['messages'], key=itemgetter('timestamp_ms')) })

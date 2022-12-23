@@ -5,7 +5,7 @@ import datetime
 import sys
 import os
 
-from utils import load_json
+from utils import encode_string, load_json
 
 YOUR_NAME = "Matt George"
 
@@ -56,7 +56,7 @@ def sort_nicknames(all_nicknames, participants):
     for key in all_nicknames.keys():
         for item in (all_nicknames[key]):
             this_set = {
-                "nickname": (re.sub(nickname_regex, "", item[1].encode('latin1').decode('utf8')).rstrip('.')),
+                "nickname": (re.sub(nickname_regex, "", encode_string(item[1])).rstrip('.')),
                 "timestamp":(datetime.datetime.fromtimestamp(item[0]/1000).strftime('%Y-%m-%d %H:%M:%S'))
             }
             for person in participants:

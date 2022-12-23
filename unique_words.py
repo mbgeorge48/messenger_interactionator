@@ -4,7 +4,7 @@ from operator import itemgetter
 import sys
 import os
 
-from utils import load_json
+from utils import encode_string, load_json
 
 def main(file_to_parse):
     json_string = load_json(file_to_parse)
@@ -16,7 +16,7 @@ def main(file_to_parse):
         print(f"On message {index} of {len(all_messages)}")
         try:
             for word in message["content"].split(" "):
-                formatted_word = ''.join(e for e in word.encode('latin1').decode('utf8') if e.isalnum()).lower()
+                formatted_word = ''.join(e for e in encode_string(word) if e.isalnum()).lower()
                 if 'http' not in formatted_word and not formatted_word.isnumeric():
                     if formatted_word in all_words.keys():
                         all_words[formatted_word]= all_words[formatted_word]+1

@@ -38,7 +38,7 @@ def main(dir_to_scan, media_type):
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[1]):
-        for media_type in ['photos', 'videos', 'files', 'audio']:
+        for media_type in ['photos', 'videos', 'files', 'audio', 'gifs']:
             main(sys.argv[1], media_type)
     else:
         print('Missing path to dir')

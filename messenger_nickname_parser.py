@@ -18,7 +18,7 @@ def get_participants(json_string):
 
 def get_nicknames(json_string, participants):
     main_pattern = '^.*?set (his own|her own|the|your) nickname.*?$'
-    nickname_patterns = {  # Need one for one's you set for yourself
+    nickname_patterns = {
         "someone_set_your_nickname": "^.*?set your nickname to .*?",
         "you_set_someones_nickname": "^You set the nickname for .*?",
         "someone_set_their_own_nickname": "^.*?set (his own|her own) nickname to .*?",

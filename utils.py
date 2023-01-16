@@ -6,4 +6,8 @@ def load_json(file_to_parse):
     return json_string
 
 def encode_string(string):
-    return string.encode('latin1').decode('utf8')
+    try:
+        return string.encode('latin1').decode('utf8')
+    except (UnicodeEncodeError, UnicodeDecodeError) as e:
+        print(f'Failed to encode {string}: \t{e}')
+        return string

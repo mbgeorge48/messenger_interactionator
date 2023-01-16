@@ -46,7 +46,11 @@ def main(dirs_to_group):
                 print(this_groups_message_data.get('title'))
                 with open(os.path.join(full_path,'combined_messages.json'), 'w') as f:
                     json.dump(this_groups_message_data, f, indent=4, ensure_ascii=False)
-
+                print('\tDeleting the combined message files')
+                for file in os.listdir(full_path):
+                    if re.search("^message.*?.json$", file):
+                        os.remove(file)
+                        print(f'\t\tDeleted {file}')
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[1]):

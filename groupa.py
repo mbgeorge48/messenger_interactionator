@@ -49,8 +49,11 @@ def main(dirs_to_group):
                 print('\tDeleting the combined message files')
                 for file in os.listdir(full_path):
                     if re.search("^message.*?.json$", file):
-                        os.remove(file)
-                        print(f'\t\tDeleted {file}')
+                        try:
+                            os.remove(file)
+                            print(f'\t\tDeleted {file}')
+                        except Exception as e:
+                            print(f'\t\tFailed to delete {file} - {e}')
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[1]):

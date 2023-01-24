@@ -10,9 +10,8 @@ function check_space {
 function unzip_time {
     mkdir -p unzipped
     # If the total uncompressed space is less than 70% of the remaining disk space don't start unzipping
-    if [ $((DISK_SPACE * 90 / 100)) -gt $total_space ] || [ IGNORE_SPACE_CHECK = true ] then
+    if [ $((DISK_SPACE * 90 / 100)) -gt $total_space ] || [ IGNORE_SPACE_CHECK = true ]; then
         echo "Starting to unzip"
-        cd /Volumes/Camera\ Roll/fb/
         for zip in $(find . -type f -name "*.zip"); do
             FILE=${zip%.zip*}
             echo "Unzipping $FILE"
@@ -26,12 +25,11 @@ function unzip_time {
 }
 
 function merging_time {
-    cd /Volumes/Camera\ Roll/fb/
     mkdir -p merged
     echo "Starting the merge"
     for folder in unzipped/*; do
         echo "Copying $folder"
-        cp -R $folder/ merged
+        cp -R $folder/* merged
     done
 }
 

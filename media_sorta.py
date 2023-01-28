@@ -10,10 +10,10 @@ from utils import load_json
 
 def main(dir_to_scan, media_type, print_logs, all_child_dirs):
     if all_child_dirs:
-        for root, dirs, _ in os.walk(dir_to_scan, topdown=False):
-            for folder in dirs:
-                print(folder)
-                path=os.path.join(root, folder)
+        for folder in os.listdir(dir_to_scan):
+            path=os.path.join(dir_to_scan, folder)
+            print(path)
+            if os.path.isdir(path):
                 process_folder(path, media_type, print_logs)
     else:
         process_folder(dir_to_scan, media_type, print_logs)
@@ -21,12 +21,15 @@ def main(dir_to_scan, media_type, print_logs, all_child_dirs):
 
 
 def process_folder(path, media_type, print_logs):
+    media_path = os.path.join(path, media_type)
+    if os.path.exists(media_path):
+        media_files = os.listdir(media_path)
+    else:
+        print(f"{media_type} folder not found - {path}")
+        return None
     messages_path = os.path.join(path, "combined_messages.json")
     json_string = load_json(messages_path)
     messages = json_string["messages"]
-
-    media_path = os.path.join(path, media_type)
-    media_files = os.listdir(media_path)
 
     updated_messages = []
     for message in messages:
@@ -37,18 +40,30 @@ def process_folder(path, media_type, print_logs):
                     if print_logs:
                         print(file,)
                     _, file_extension = os.path.splitext(file)
-                    new_name = f"{datetime.datetime.fromtimestamp(message['timestamp_ms']/1000).strftime('%Y-%m-%d_%H%M%S')}-{message['sender_name'].replace(' ', '_')}{file_extension}"
-                    os.rename(os.path.join(path, media_type, file), os.path.join(path, media_type, new_name))
-                    message.get(media_type)[media_index]['uri']=os.path.join(media_type, new_name)
-                    updated_messages.append(message)
+                    media_timestamp = datetime.datetime.fromtimestamp(message['timestamp_ms']/1000).strftime('%Y-%m-%d_%H%M%S')
+                    media_sender = message['sender_name'].replace(' ', '_')
+                    new_name = f"{media_timestamp}-{media_sender}{file_extension}"
+
+                    current_path = os.path.join(path, media_type, file)
+                    new_path = os.path.join(path, media_type, new_name)
+
+                    print(f'Renaming {current_path} to {new_path}' end="")
+                    try:
+                        os.rename(current_path, new_path)
+                        message.get(media_type)[media_index]['uri']=os.path.join(media_type, new_name)
+                        updated_messages.append(message)
+                    except FileNotFoundError as fnf_e:
+                        print(f"\nFailed to move {file} to {new_path}", fnf_e)
+                    except Exception as e:
+                        print("Something went wrong", e)
         else:
             updated_messages.append(message)
 
     json_string.update({'messages': updated_messages})
+    print('')
 
     with open(messages_path, 'w') as f:
         json.dump(json_string, f, indent=4, ensure_ascii=False)
-        print(messages_path)
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[1]):

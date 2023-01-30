@@ -56,8 +56,8 @@ cd $1
 total_space=0
 
 # Comment and uncomment as you go to only run certain functions
-check_space
-# unzip_time
-# merging_time
+# check_space
+unzip_time
+merging_time
 # rezip
 # tidy_up

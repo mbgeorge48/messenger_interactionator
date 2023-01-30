@@ -47,7 +47,7 @@ def process_folder(path, media_type, print_logs):
                     current_path = os.path.join(path, media_type, file)
                     new_path = os.path.join(path, media_type, new_name)
 
-                    print(f'Renaming {current_path} to {new_path}' end="")
+                    print(f'Renaming {current_path} to {new_path}', end="")
                     try:
                         os.rename(current_path, new_path)
                         message.get(media_type)[media_index]['uri']=os.path.join(media_type, new_name)

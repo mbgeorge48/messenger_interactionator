@@ -39,6 +39,10 @@ Also updates the combined_messages.json file with the new names
 
 ```bash
 python3 media_sorta.py path/to/the/chat/folder/maybe/messages/inbox/chat
+
+OR
+
+python3 media_sorta.py path/to/the/chat/folder/maybe/messages/inbox/ -a
 ```
 
 ## Renamed ya
@@ -58,3 +62,12 @@ Bit of a WIP but just does a word count on all the messages and prints a list of
 ```bash
 python3 unique_words.py /path/to/messages.json
 ```
+
+# Order of play
+
+- Uncomment the functions you want in `unzippa.sh`
+  - By default you'd probably want `unzip_time` and `merging_time`
+- Now you want to run the `groupa.py` on the `merged` folder that gets created in the previous step
+- After `combined_messages.json` has been generated you want to run `renamed_ya.sh` to give all the message groups nicer names
+- Finally you can run `media_sorter.py` on all the messenger groups to rename all the media
+- If you really want you can uncomment `rezip` and `tidy_up` and comment out `unzip_time` and `merging_time` in `unzippa.sh`

@@ -5,15 +5,9 @@ import datetime
 import sys
 import os
 
-from utils import load_json
+from utils import load_json, get_participants
 
 YOUR_NAME = "Matt George"
-
-def get_participants(json_string):
-    participants = list()
-    for name in json_string:
-        participants.append(name['name'])
-    return participants
 
 
 def get_nicknames(json_string, participants):

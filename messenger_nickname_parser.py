@@ -81,10 +81,10 @@ def main(file_to_parse):
     for participant in peoples_nicknames.keys():
         print(participant,len(peoples_nicknames[participant]))
         totals[participant] = len(peoples_nicknames[participant])
-    peoples_nicknames['totals'] = totals
+    peoples_nicknames['totals'] = dict(sorted(totals.items(), key=lambda item: item[1],reverse=True))
 
     with open('nickname_results.json', 'w') as f:
-        json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), sort_keys=True, ensure_ascii=False)
+        json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), ensure_ascii=False)
 
 
 if __name__ == '__main__':

@@ -11,3 +11,9 @@ def encode_string(string):
     except (UnicodeEncodeError, UnicodeDecodeError) as e:
         print(f'Failed to encode {string}: \t{e}')
         return string
+
+def get_participants(json_string):
+    participants = list()
+    for name in json_string:
+        participants.append(name['name'])
+    return participants

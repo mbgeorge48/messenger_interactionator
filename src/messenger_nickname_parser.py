@@ -5,7 +5,7 @@ import datetime
 import sys
 import os
 
-from src.utils import get_your_name, load_json, get_participants, read_message_file
+from utils import get_your_name, load_json, get_participants, read_message_file
 
 YOUR_NAME = get_your_name()
 

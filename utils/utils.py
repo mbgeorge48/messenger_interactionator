@@ -1,5 +1,13 @@
 import json
 
+def read_message_file(file_to_parse):
+    with open(file_to_parse) as json_data:
+        json_string = json.load(json_data)
+    participants = json_string['participants']
+    messages = json_string['messages']
+    return {messages: messages, participants: participants}
+
+
 def load_json(file_to_parse):
     with open(file_to_parse) as json_data:
         json_string = json.load(json_data)
@@ -13,7 +21,7 @@ def encode_string(string):
         return string
 
 def get_participants(json_string):
-    participants = list()
+    participants = []
     for name in json_string:
         participants.append(name['name'])
     return participants

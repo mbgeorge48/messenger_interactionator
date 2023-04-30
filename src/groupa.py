@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-from utils.utils import encode_string, load_json
+from src.utils import encode_string, load_json
 
 def delete_files(full_path):
     print('\tDeleting the combined message files')

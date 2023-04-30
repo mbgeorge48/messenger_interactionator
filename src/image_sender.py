@@ -5,7 +5,7 @@ import datetime
 import sys
 import os
 
-from utils.utils import load_json, get_participants
+from src.utils import load_json, get_participants
 
 YOUR_NAME = "Matt George"
 

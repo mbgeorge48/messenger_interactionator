@@ -4,7 +4,7 @@ from operator import itemgetter
 import sys
 import os
 
-from utils.utils import encode_string, load_json
+from src.utils import encode_string, load_json
 
 def main(file_to_parse):
     json_string = load_json(file_to_parse)

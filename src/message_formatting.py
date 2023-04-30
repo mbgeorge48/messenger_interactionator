@@ -4,7 +4,7 @@ import os
 import re
 import sys
 
-from utils.utils import encode_string, load_json
+from utils import encode_string, load_json
 
 
 def main(dirs_to_group):

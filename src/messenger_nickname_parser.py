@@ -5,7 +5,7 @@ import datetime
 import sys
 import os
 
-from utils.utils import get_your_name, load_json, get_participants
+from src.utils import get_your_name, load_json, get_participants, read_message_file
 
 YOUR_NAME = get_your_name()
 
@@ -64,11 +64,19 @@ def sort_nicknames(all_nicknames, participants):
     return peoples_nicknames
 
 
-def main(file_to_parse):
-    json_string = load_json(file_to_parse)
-    participants = get_participants(json_string['participants'])
-    all_nicknames = get_nicknames(json_string['messages'], participants)
+def main(data_to_parse):
+    data=[]
+    for file in data_to_parse:
+        data.append=(read_message_file(file))
 
+    participants=[]
+    messages=[]
+    for entry in data:
+        participants.append(get_participants(entry.participants))
+        messages.append(entry.messages)
+    participants=list(dict.fromkeys(participants))
+
+    all_nicknames = get_nicknames(messages, participants)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
 
     totals = {}
@@ -83,6 +91,12 @@ def main(file_to_parse):
 
 if __name__ == '__main__':
     if os.path.isfile(sys.argv[1]):
-        main(sys.argv[1])
+        main([sys.argv[1]])
+    elif os.path.isdir(sys.argv[1]):
+        files_to_parse=[]
+        for file in os.listdir(sys.argv[1]):
+            if file.endswith(".json"):
+                files_to_parse.append(file)
+        main(files_to_parse)
     else:
         print('Missing path to file')

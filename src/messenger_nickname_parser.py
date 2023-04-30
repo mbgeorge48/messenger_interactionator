@@ -67,13 +67,11 @@ def sort_nicknames(all_nicknames, participants):
 def main(data_to_parse):
     data=[]
     for file in data_to_parse:
-        data.append=(read_message_file(file))
+        data.append(read_message_file(file))
 
-    participants=[]
-    messages=[]
     for entry in data:
-        participants.append(get_participants(entry.participants))
-        messages.append(entry.messages)
+        participants=participants + get_participants(entry["participants"])
+        messages=messages + entry["messages"]
     participants=list(dict.fromkeys(participants))
 
     all_nicknames = get_nicknames(messages, participants)
@@ -96,7 +94,7 @@ if __name__ == '__main__':
         files_to_parse=[]
         for file in os.listdir(sys.argv[1]):
             if file.endswith(".json"):
-                files_to_parse.append(file)
+                files_to_parse.append(os.path.join(sys.argv[1], file))
         main(files_to_parse)
     else:
         print('Missing path to file')

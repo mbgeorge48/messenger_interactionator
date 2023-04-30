@@ -1,5 +1,4 @@
 import datetime
-from operator import itemgetter
 import json
 import os
 import re

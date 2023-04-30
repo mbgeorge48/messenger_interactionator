@@ -5,9 +5,9 @@ import datetime
 import sys
 import os
 
-from utils import load_json, get_participants
+from utils.utils import get_your_name, load_json, get_participants
 
-YOUR_NAME = "Matt George"
+YOUR_NAME = get_your_name()
 
 
 def get_nicknames(json_string, participants):

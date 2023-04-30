@@ -17,3 +17,6 @@ def get_participants(json_string):
     for name in json_string:
         participants.append(name['name'])
     return participants
+
+def get_your_name():
+    return load_json('your_name.json').name

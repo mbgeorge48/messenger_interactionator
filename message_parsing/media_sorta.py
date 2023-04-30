@@ -5,7 +5,7 @@ import datetime
 import sys
 import os
 
-from utils import load_json
+from utils.utils import load_json
 
 
 def main(dir_to_scan, media_type, print_logs, all_child_dirs):

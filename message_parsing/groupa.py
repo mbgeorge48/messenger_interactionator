@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-from utils import encode_string, load_json
+from utils.utils import encode_string, load_json
 
 def main(dirs_to_group):
     for root, dirs, _ in os.walk(dirs_to_group, topdown=False):

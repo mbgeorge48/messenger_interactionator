@@ -7,7 +7,18 @@ import sys
 
 from utils.utils import encode_string, load_json
 
-def main(dirs_to_group):
+def delete_files(full_path):
+    print('\tDeleting the combined message files')
+    for file in os.listdir(full_path):
+        if re.search("^message.*?.json$", file):
+            try:
+                os.remove(os.path.join(full_path, file))
+                print(f'\t\tDeleted {file}')
+            except Exception as e:
+                print(f'\t\tFailed to delete {file} - {e}')
+
+
+def main(dirs_to_group, delete_after_combining=False):
     for root, dirs, _ in os.walk(dirs_to_group, topdown=False):
         for name in dirs:
             full_path = os.path.join(root, name)
@@ -46,17 +57,11 @@ def main(dirs_to_group):
                 print(this_groups_message_data.get('title'))
                 with open(os.path.join(full_path,'combined_messages.json'), 'w') as f:
                     json.dump(this_groups_message_data, f, indent=4, ensure_ascii=False)
-                print('\tDeleting the combined message files')
-                for file in os.listdir(full_path):
-                    if re.search("^message.*?.json$", file):
-                        try:
-                            os.remove(os.path.join(full_path, file))
-                            print(f'\t\tDeleted {file}')
-                        except Exception as e:
-                            print(f'\t\tFailed to delete {file} - {e}')
+                if delete_after_combining:
+                    delete_files(full_path)
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[1]):
-        main(sys.argv[1])
+        main(sys.argv[1], True if sys.argv[2]=='delete' else False)
     else:
         print('Missing path')

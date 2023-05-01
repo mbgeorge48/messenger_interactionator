@@ -1,8 +1,7 @@
-import re
 import collections
 import datetime
+import re
 import sys
-import os
 
 from utils import get_data_to_parse, get_your_name, initial_file_load, write_to_file
 
@@ -10,47 +9,67 @@ YOUR_NAME = get_your_name()
 
 
 def get_nicknames(json_string):
-    main_pattern = '^.*?set (his own|her own|the|your) nickname.*?$'
+    main_pattern = "^.*?set (his own|her own|the|your) nickname.*?$"
     nickname_patterns = {
         "someone_set_your_nickname": "^.*?set your nickname to .*?",
         "you_set_someones_nickname": "^You set the nickname for .*?",
         "someone_set_their_own_nickname": "^.*?set (his own|her own) nickname to .*?",
         "someone_set_someones_nickname": "^.*?set the nickname for .*?",
-        "you_set_your_own_nickname": "^You set your nickname to .*?"
+        "you_set_your_own_nickname": "^You set your nickname to .*?",
     }
 
     nickname_details = dict()
     for message in json_string:
         try:  # Need to catch as I found that not all messages have content
             if re.match(main_pattern, message["content"]) is not None:
-                nickname_details[message['timestamp_ms']] = message['content']
+                nickname_details[message["timestamp_ms"]] = message["content"]
         except:
             pass
 
     nicknames_sorted = collections.defaultdict(list)
     for item in list(nickname_details.items()):
-        if re.match(nickname_patterns.get("someone_set_your_nickname"), item[1]) is not None:
+        if (
+            re.match(nickname_patterns.get("someone_set_your_nickname"), item[1])
+            is not None
+        ):
             nicknames_sorted["someone_set_your_nickname"].append(item)
-        elif re.match(nickname_patterns.get("you_set_someones_nickname"), item[1]) is not None:
+        elif (
+            re.match(nickname_patterns.get("you_set_someones_nickname"), item[1])
+            is not None
+        ):
             nicknames_sorted["you_set_someones_nickname"].append(item)
-        elif re.match(nickname_patterns.get("someone_set_their_own_nickname"), item[1]) is not None:
+        elif (
+            re.match(nickname_patterns.get("someone_set_their_own_nickname"), item[1])
+            is not None
+        ):
             nicknames_sorted["someone_set_their_own_nickname"].append(item)
-        elif re.match(nickname_patterns.get("someone_set_someones_nickname"), item[1]) is not None:
+        elif (
+            re.match(nickname_patterns.get("someone_set_someones_nickname"), item[1])
+            is not None
+        ):
             nicknames_sorted["someone_set_someones_nickname"].append(item)
-        elif re.match(nickname_patterns.get("you_set_your_own_nickname"), item[1]) is not None:
+        elif (
+            re.match(nickname_patterns.get("you_set_your_own_nickname"), item[1])
+            is not None
+        ):
             nicknames_sorted["you_set_your_own_nickname"].append(item)
 
     return nicknames_sorted
+
 
 def sort_nicknames(all_nicknames, participants):
     peoples_nicknames = collections.defaultdict(list)
     nickname_regex = "^.*?set.*?nickname.*?to "
 
     for key in all_nicknames.keys():
-        for item in (all_nicknames[key]):
+        for item in all_nicknames[key]:
             this_set = {
-                "nickname": (re.sub(nickname_regex, "", item[1]).rstrip('.')),
-                "timestamp":(datetime.datetime.fromtimestamp(item[0]/1000).strftime('%Y-%m-%d %H:%M:%S'))
+                "nickname": (re.sub(nickname_regex, "", item[1]).rstrip(".")),
+                "timestamp": (
+                    datetime.datetime.fromtimestamp(item[0] / 1000).strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                ),
             }
             for person in participants:
                 if person in item[1]:
@@ -64,22 +83,24 @@ def sort_nicknames(all_nicknames, participants):
 
 
 def main(data_to_parse):
-    messages, participants=get_data_to_parse(data_to_parse)
+    messages, participants = get_data_to_parse(data_to_parse)
 
     all_nicknames = get_nicknames(messages)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
 
     totals = {}
     for participant in peoples_nicknames.keys():
-        print(participant,len(peoples_nicknames[participant]))
+        print(participant, len(peoples_nicknames[participant]))
         totals[participant] = len(peoples_nicknames[participant])
-    peoples_nicknames['totals'] = dict(sorted(totals.items(), key=lambda item: item[1],reverse=True))
+    peoples_nicknames["totals"] = dict(
+        sorted(totals.items(), key=lambda item: item[1], reverse=True)
+    )
 
-    write_to_file('nickname_results.json', peoples_nicknames)
+    write_to_file("nickname_results.json", peoples_nicknames)
 
 
-if __name__ == '__main__':
-    if len(sys.argv)>1:
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
         main(initial_file_load(sys.argv[1]))
     else:
-        print('Missing path to file')
+        print("Missing path to file")

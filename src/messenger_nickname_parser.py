@@ -1,11 +1,10 @@
-import json
 import re
 import collections
 import datetime
 import sys
 import os
 
-from utils import get_your_name, load_json, get_participants, read_message_file
+from utils import get_data_to_parse, get_your_name, initial_file_load, write_to_file
 
 YOUR_NAME = get_your_name()
 
@@ -65,14 +64,7 @@ def sort_nicknames(all_nicknames, participants):
 
 
 def main(data_to_parse):
-    data=[]
-    for file in data_to_parse:
-        data.append(read_message_file(file))
-
-    for entry in data:
-        participants=participants + get_participants(entry["participants"])
-        messages=messages + entry["messages"]
-    participants=list(dict.fromkeys(participants))
+    messages, participants=get_data_to_parse(data_to_parse)
 
     all_nicknames = get_nicknames(messages, participants)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
@@ -83,18 +75,11 @@ def main(data_to_parse):
         totals[participant] = len(peoples_nicknames[participant])
     peoples_nicknames['totals'] = dict(sorted(totals.items(), key=lambda item: item[1],reverse=True))
 
-    with open('nickname_results.json', 'w') as f:
-        json.dump(peoples_nicknames, f, indent=4, separators=(',', ': '), ensure_ascii=False)
+    write_to_file('nickname_results.json', peoples_nicknames)
 
 
 if __name__ == '__main__':
-    if os.path.isfile(sys.argv[1]):
-        main([sys.argv[1]])
-    elif os.path.isdir(sys.argv[1]):
-        files_to_parse=[]
-        for file in os.listdir(sys.argv[1]):
-            if file.endswith(".json"):
-                files_to_parse.append(os.path.join(sys.argv[1], file))
-        main(files_to_parse)
+    if len(sys.argv)>1:
+        main(initial_file_load(sys.argv[1]))
     else:
         print('Missing path to file')

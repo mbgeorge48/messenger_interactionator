@@ -9,7 +9,7 @@ from utils import get_data_to_parse, get_your_name, initial_file_load, write_to_
 YOUR_NAME = get_your_name()
 
 
-def get_nicknames(json_string, participants):
+def get_nicknames(json_string):
     main_pattern = '^.*?set (his own|her own|the|your) nickname.*?$'
     nickname_patterns = {
         "someone_set_your_nickname": "^.*?set your nickname to .*?",
@@ -66,7 +66,7 @@ def sort_nicknames(all_nicknames, participants):
 def main(data_to_parse):
     messages, participants=get_data_to_parse(data_to_parse)
 
-    all_nicknames = get_nicknames(messages, participants)
+    all_nicknames = get_nicknames(messages)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
 
     totals = {}

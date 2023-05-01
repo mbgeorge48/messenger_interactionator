@@ -6,6 +6,7 @@ import re
 import sys
 
 from src.utils import encode_string, load_json
+from utils import process_message_data, write_to_file
 
 def delete_files(full_path):
     print('\tDeleting the combined message files')
@@ -41,22 +42,12 @@ def main(dirs_to_group, delete_after_combining=False):
             if this_groups_message_data:
                 this_groups_message_data.update({'title':encode_string(this_groups_message_data['title'])})
                 for message in this_groups_message_data['messages']:
+                    message = process_message_data(message)
 
-                    if message.get("content"):
-                        message['content'] = encode_string(message.get('content'))
-                    if message.get("bumped_message_metadata") and message.get("bumped_message_metadata").get("bumped_message") :
-                        message["bumped_message_metadata"]["bumped_message"] = encode_string(message.get('bumped_message_metadata').get("bumped_message"))
-                    if message.get("reactions"):
-                        for reaction in message.get("reactions"):
-                            reaction["reaction"] = encode_string(reaction.get('reaction'))
-                    if message.get("audio_files"):
-                        message["audio"] = message.pop("audio_files")
-                    message["timestamp_converted"] = datetime.datetime.fromtimestamp(message['timestamp_ms']/1000).strftime('%Y-%m-%d %H:%M:%S')
 
                 this_groups_message_data.update({'messages': sorted(this_groups_message_data.get('messages'), key=itemgetter('timestamp_ms')) })
                 print(this_groups_message_data.get('title'))
-                with open(os.path.join(full_path,'combined_messages.json'), 'w') as f:
-                    json.dump(this_groups_message_data, f, indent=4, ensure_ascii=False)
+                write_to_file('combined_messages.json', this_groups_message_data)
                 if delete_after_combining:
                     delete_files(full_path)
 

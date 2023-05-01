@@ -6,3 +6,4 @@ from .initial_file_load import initial_file_load
 from .load_json import load_json
 from .read_message_file import read_message_file
 from .write_to_file import write_to_file
+from .process_message_data import process_message_data

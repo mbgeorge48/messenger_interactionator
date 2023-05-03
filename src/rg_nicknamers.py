@@ -7,8 +7,14 @@ from utils import get_data_to_parse, get_your_name, initial_file_load, write_to_
 
 YOUR_NAME = get_your_name()
 
+def initialise_nicknames_set_dict(participants):
+    nicknames_set={}
+    for participant in participants:
+        nicknames_set[participant]=0
+    return nicknames_set
 
-def get_nicknames(json_string):
+
+def get_nicknames(json_string,nicknames_set):
     main_pattern = "^.*?set (his own|her own|the|your) nickname.*?$"
     nickname_patterns = {
         "someone_set_your_nickname": "^.*?set your nickname to .*?",
@@ -18,11 +24,12 @@ def get_nicknames(json_string):
         "you_set_your_own_nickname": "^You set your nickname to .*?",
     }
 
-    nickname_details = dict()
+    nickname_details = {}
     for message in json_string:
         try:  # Need to catch as I found that not all messages have content
             if re.match(main_pattern, message["content"]) is not None:
                 nickname_details[message["timestamp_ms"]] = message["content"]
+                nicknames_set[message["sender_name"]]+=1
         except:
             pass
 
@@ -54,7 +61,7 @@ def get_nicknames(json_string):
         ):
             nicknames_sorted["you_set_your_own_nickname"].append(item)
 
-    return nicknames_sorted
+    return nicknames_sorted, nicknames_set
 
 
 def sort_nicknames(all_nicknames, participants):
@@ -71,30 +78,51 @@ def sort_nicknames(all_nicknames, participants):
                     )
                 ),
             }
-            for person in participants:
-                if person in item[1]:
-                    peoples_nicknames[person].append(this_set)
+            for participant in participants:
+                if participant in item[1]:
+                    peoples_nicknames[participant].append(this_set)
             if "someone_set_your_nickname" == key:
                 peoples_nicknames[YOUR_NAME].append(this_set)
             if "you_set_your_own_nickname" == key:
                 peoples_nicknames[YOUR_NAME].append(this_set)
 
+    for participant in participants:
+        peoples_nicknames[participant].sort(key = lambda x:x['timestamp'], reverse=True)
+
     return peoples_nicknames
 
 
+
+def get_the_oldest_nickname(peoples_nicknames, length=3):
+    current_nicknames = []
+    for participant in peoples_nicknames:
+        current_nicknames.append({
+            "participant":participant,
+            "nickname":peoples_nicknames[participant][0]["nickname"],
+            "timestamp":peoples_nicknames[participant][0]["timestamp"]
+        })
+    current_nicknames.sort(key = lambda x:x['timestamp'])
+
+    return current_nicknames[:length]
+
 def main(data_to_parse):
     messages, participants = get_data_to_parse(data_to_parse)
+    nicknames_set = initialise_nicknames_set_dict(participants)
 
-    all_nicknames = get_nicknames(messages)
+    all_nicknames, nicknames_set = get_nicknames(messages,nicknames_set)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)
+    oldest_nicknames = get_the_oldest_nickname(peoples_nicknames)
 
-    totals = {}
+    nicknames_had = {}
     for participant in peoples_nicknames.keys():
-        print(participant, len(peoples_nicknames[participant]))
-        totals[participant] = len(peoples_nicknames[participant])
-    peoples_nicknames["totals"] = dict(
-        sorted(totals.items(), key=lambda item: item[1], reverse=True)
+        nicknames_had[participant] = len(peoples_nicknames[participant])
+    peoples_nicknames["nicknames_had"] = dict(
+        sorted(nicknames_had.items(), key=lambda item: item[1], reverse=True)
     )
+    peoples_nicknames["nicknames_set"] = dict(
+        sorted(nicknames_set.items(), key=lambda item: item[1], reverse=True)
+    )
+    peoples_nicknames["oldest_nicknames"] = oldest_nicknames
 
     write_to_file("nickname_results.json", peoples_nicknames)
 

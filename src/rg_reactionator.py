@@ -110,12 +110,6 @@ def main(data_to_parse, date_range_start, date_range_end):
     )
     write_to_file("reactionator_results.json", reaction_data)
 
-    # Pull of the most/least reactive person
-    # Run with the common emojis (laugh(all types), shock, heart)
-
-    # with open('react_results.json', 'w') as f:
-    #     json.dump(list_of_stuff, f, indent=4, separators=(',', ': '), ensure_ascii=False)
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

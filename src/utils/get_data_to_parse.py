@@ -13,6 +13,11 @@ def date_filter(messages, date_range):
         and messages[-1]["timestamp_converted"] < date_range["end"]
     ):
         return messages
+    elif (
+        not messages[0]["timestamp_converted"] > date_range["start"]
+        and not messages[-1]["timestamp_converted"] < date_range["end"]
+    ):
+        return []
 
     filtered_messages = []
     for message in messages:

@@ -2,8 +2,8 @@ from .encode_string import encode_string
 from .get_data_to_parse import get_data_to_parse
 from .get_participants import get_participants
 from .get_your_name import get_your_name
-from .initialise_counter_dict import initialise_counter_dict
 from .initial_file_load import initial_file_load
+from .initialise_counter_dict import initialise_counter_dict
 from .load_json import load_json
 from .process_message_data import process_message_data
 from .read_message_file import read_message_file

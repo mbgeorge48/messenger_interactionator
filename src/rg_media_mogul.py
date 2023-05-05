@@ -2,12 +2,8 @@ import operator
 import sys
 from operator import itemgetter
 
-from utils import (
-    get_data_to_parse,
-    initial_file_load,
-    initialise_counter_dict,
-    write_to_file,
-)
+from utils import (get_data_to_parse, initial_file_load,
+                   initialise_counter_dict, write_to_file)
 
 
 def get_all_media_sent_messages(messages):

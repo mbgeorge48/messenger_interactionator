@@ -1,14 +1,12 @@
 import operator
 import sys
 
-from utils import get_data_to_parse, initial_file_load, write_to_file
-
-
-def initialise_reaction_counter_dict(participants):
-    reaction_counter = {}
-    for participant in participants:
-        reaction_counter[participant] = 0
-    return reaction_counter
+from utils import (
+    get_data_to_parse,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 
 def get_all_reacted_messages(messages, min_reactions_length=0):
@@ -92,7 +90,7 @@ def main(data_to_parse, date_range_start, date_range_end):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
     )
-    reaction_counter = initialise_reaction_counter_dict(participants)
+    reaction_counter = initialise_counter_dict(participants)
 
     reaction_data = {}
     reaction_data["reacted_messages"] = get_all_reacted_messages(messages)

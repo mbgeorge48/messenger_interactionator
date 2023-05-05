@@ -3,16 +3,15 @@ import datetime
 import re
 import sys
 
-from utils import get_data_to_parse, get_your_name, initial_file_load, write_to_file
+from utils import (
+    get_data_to_parse,
+    get_your_name,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 YOUR_NAME = get_your_name()
-
-
-def initialise_nicknames_set_dict(participants):
-    nicknames_set = {}
-    for participant in participants:
-        nicknames_set[participant] = 0
-    return nicknames_set
 
 
 def get_nicknames(json_string, nicknames_set):
@@ -113,7 +112,7 @@ def main(data_to_parse, date_range_start, date_range_end):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
     )
-    nicknames_set = initialise_nicknames_set_dict(participants)
+    nicknames_set = initialise_counter_dict(participants)
 
     all_nicknames, nicknames_set = get_nicknames(messages, nicknames_set)
     peoples_nicknames = sort_nicknames(all_nicknames, participants)

@@ -4,16 +4,6 @@ from datetime import datetime
 import utils
 
 
-def multi_chat_searching(data_to_parse):
-    return ""
-
-
-# If type of data_to_parse is a list then you need to find all the json files in those folders
-# return the list of files
-# maybe need to change data_to_parse in the parent to say it's a list of dirs to scan
-# the combined messages object will be huge
-
-
 def date_filter(messages, date_range):
     if (
         messages[0]["timestamp_converted"] > date_range["start"]

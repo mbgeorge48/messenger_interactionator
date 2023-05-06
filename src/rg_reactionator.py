@@ -1,8 +1,12 @@
+import argparse
 import operator
-import sys
 
-from utils import (get_data_to_parse, initial_file_load,
-                   initialise_counter_dict, write_to_file)
+from utils import (
+    get_data_to_parse,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 
 def get_all_reacted_messages(messages, min_reactions_length=0):
@@ -82,37 +86,90 @@ def find_each_participants_biggest_fan(all_reacted_messages):
     return fan_zone
 
 
-def main(data_to_parse, date_range_start, date_range_end):
+def get_emjois_to_search(emojis_key):
+    if emojis_key == "laugh":
+        return ["😅", "😂", "🤣", "😆"]
+    if emojis_key == "heart":
+        return ["😍", "❤", "💜", "💗", "🥰", "💛", "💙", "💚"]
+    if emojis_key == "thumb":
+        return ["👍", " 👍🏻" ",👍🏾", "👍🏽", "👍🏼", "👍🏿"]
+    if emojis_key == "shock":
+        return ["😲", "🤯", "😮"]
+    if emojis_key == "anger":
+        return ["🤬", "😠"]
+
+
+def main(
+    data_to_parse,
+    date_range_start,
+    date_range_end,
+    emojis_key,
+    saveallreacts,
+    saveallemojis,
+):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
     )
     reaction_counter = initialise_counter_dict(participants)
 
     reaction_data = {}
-    reaction_data["reacted_messages"] = get_all_reacted_messages(messages)
+    all_reacted_messages = get_all_reacted_messages(messages)
+    if saveallreacts:
+        reaction_data["reacted_messages"] = all_reacted_messages
     reaction_data["times_reacted"] = find_most_and_least_reactive_participant(
-        reaction_data["reacted_messages"], participants
+        all_reacted_messages, participants
     )
+    emojis = get_emjois_to_search(emojis_key)
     reaction_data["reaction_counter"] = find_most_likely_to_react_with(
-        reaction_data["reacted_messages"], ["😅", "😂", "🤣", "😆"], reaction_counter
+        all_reacted_messages, emojis, reaction_counter
     )
-    reaction_data["emoji_counter"] = find_most_common_reaction(
-        reaction_data["reacted_messages"]
-    )
-    reaction_data["fan_zone"] = find_each_participants_biggest_fan(
-        reaction_data["reacted_messages"]
-    )
+    if saveallemojis:
+        reaction_data["emoji_counter"] = find_most_common_reaction(all_reacted_messages)
+    reaction_data["fan_zone"] = find_each_participants_biggest_fan(all_reacted_messages)
     write_to_file("reactionator_results.json", reaction_data)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        date_range_start = None
-        date_range_end = None
-        if len(sys.argv) > 2:
-            date_range_start = sys.argv[2]
-        if len(sys.argv) > 3:
-            date_range_end = sys.argv[3]
-        main(initial_file_load(sys.argv[1]), date_range_start, date_range_end)
-    else:
-        print("Missing path to file")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", type=str, required=True)
+    parser.add_argument("--multichat", type=bool, default=False)
+    parser.add_argument(
+        "--drstart",
+        type=str,
+        help="The date range start for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "--drend",
+        type=str,
+        help="The date range end for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "-e",
+        "--emojis",
+        type=str,
+        help="The type of emoji you want to count",
+        choices=["laugh", "heart", "thumb", "shock", "anger"],
+        default="laugh",
+    )
+    parser.add_argument(
+        "--saveallreacts",
+        type=bool,
+        default=False,
+        help="Save all the reacted messages in the json",
+    )
+    parser.add_argument(
+        "--saveallemojis",
+        type=bool,
+        default=False,
+        help="Save all the reacted messages in the json",
+    )
+    args = parser.parse_args()
+
+    main(
+        initial_file_load(args.file, args.multichat),
+        args.drstart,
+        args.drend,
+        args.emojis,
+        args.saveallreacts,
+        args.saveallemojis,
+    )

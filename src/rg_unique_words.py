@@ -5,6 +5,8 @@ import sys
 
 from src.utils import encode_string, load_json
 
+# OUTDATED
+
 
 def main(file_to_parse):
     json_string = load_json(file_to_parse)

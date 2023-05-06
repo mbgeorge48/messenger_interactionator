@@ -1,6 +1,4 @@
-import operator
-import sys
-from operator import itemgetter
+import argparse
 
 from utils import (
     get_data_to_parse,
@@ -85,7 +83,48 @@ def get_media_sent_by_type_count_breakdowns(all_media_sent_messages):
     return media_sent_breakdown
 
 
-def main(data_to_parse, date_range_start, date_range_end):
+def get_media_detail_sent_by_specific_participant(
+    all_media_sent_messages, specific_participant, specific_mediatype
+):
+    data = {}
+    if specific_mediatype:
+        data[specific_participant] = {specific_mediatype: []}
+    else:
+        data[specific_participant] = {
+            "photos": [],
+            "videos": [],
+            "files": [],
+            "audio": [],
+            "gifs": [],
+        }
+
+    for message in all_media_sent_messages:
+        for media_type in (
+            [specific_mediatype]
+            if specific_mediatype
+            else ["photos", "videos", "files", "audio", "gifs"]
+        ):
+            if message.get("sender_name") == specific_participant and message.get(
+                media_type
+            ):
+                data[specific_participant][media_type].append(message[media_type])
+
+    for media_type in data[specific_participant]:
+        data[specific_participant][media_type] = [
+            item
+            for sublist in data[specific_participant][media_type]
+            for item in sublist
+        ]
+    return data
+
+
+def main(
+    data_to_parse,
+    date_range_start,
+    date_range_end,
+    specific_participant,
+    specific_mediatype,
+):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
     )
@@ -93,6 +132,11 @@ def main(data_to_parse, date_range_start, date_range_end):
     data = {}
     media_sender = initialise_counter_dict(participants)
     all_media_sent_messages = get_all_media_sent_messages(messages)
+    if specific_participant:
+        data["specific_participant"] = get_media_detail_sent_by_specific_participant(
+            all_media_sent_messages, specific_participant, specific_mediatype
+        )
+
     data["media_sent_totals"] = count_media_sent_by_participants(
         all_media_sent_messages, media_sender
     )
@@ -110,13 +154,36 @@ def main(data_to_parse, date_range_start, date_range_end):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        date_range_start = None
-        date_range_end = None
-        if len(sys.argv) > 2:
-            date_range_start = sys.argv[2]
-        if len(sys.argv) > 3:
-            date_range_end = sys.argv[3]
-        main(initial_file_load(sys.argv[1]), date_range_start, date_range_end)
-    else:
-        print("Missing path to file")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", type=str, required=True)
+    parser.add_argument("--multichat", type=bool, default=False)
+    parser.add_argument(
+        "--drstart",
+        type=str,
+        help="The date range start for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "--drend",
+        type=str,
+        help="The date range end for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "--participant",
+        type=str,
+        help="Get a certain participants media",
+    )
+    parser.add_argument(
+        "--mediatype",
+        type=str,
+        help="Get a specific media type",
+        choices=["photos", "videos", "files", "audio", "gifs"],
+    )
+    args = parser.parse_args()
+
+    main(
+        initial_file_load(args.file, args.multichat),
+        args.drstart,
+        args.drend,
+        args.participant,
+        args.mediatype,
+    )

@@ -1,10 +1,15 @@
+import argparse
 import collections
 import datetime
 import re
-import sys
 
-from utils import (get_data_to_parse, get_your_name, initial_file_load,
-                   initialise_counter_dict, write_to_file)
+from utils import (
+    get_data_to_parse,
+    get_your_name,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 YOUR_NAME = get_your_name()
 
@@ -128,13 +133,23 @@ def main(data_to_parse, date_range_start, date_range_end):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        date_range_start = None
-        date_range_end = None
-        if len(sys.argv) > 2:
-            date_range_start = sys.argv[2]
-        if len(sys.argv) > 3:
-            date_range_end = sys.argv[3]
-        main(initial_file_load(sys.argv[1]), date_range_start, date_range_end)
-    else:
-        print("Missing path to file")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", type=str, required=True)
+    parser.add_argument("--multichat", type=bool, default=False)
+    parser.add_argument(
+        "--drstart",
+        type=str,
+        help="The date range start for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "--drend",
+        type=str,
+        help="The date range end for getting messages, format needs to be (YYYY-MM)",
+    )
+    args = parser.parse_args()
+
+    main(
+        initial_file_load(args.file, args.multichat),
+        args.drstart,
+        args.drend,
+    )

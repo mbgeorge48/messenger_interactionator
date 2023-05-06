@@ -120,7 +120,7 @@ def main(
         all_reacted_messages, participants
     )
     emojis = get_emjois_to_search(emojis_key)
-    reaction_data["reaction_counter"] = find_most_likely_to_react_with(
+    reaction_data[f"reaction_counter-{emojis_key}"] = find_most_likely_to_react_with(
         all_reacted_messages, emojis, reaction_counter
     )
     if saveallemojis:

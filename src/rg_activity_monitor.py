@@ -28,16 +28,6 @@ def most_active(messages):
 
 
 def get_yearly_message_count(messages):
-    current_year = int(datetime.now().strftime("%Y"))
-    starting_year = int(
-        datetime.strptime(
-            messages[0].get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
-        ).strftime("%Y")
-    )
-
-    years_to_check = [starting_year]
-    while current_year not in years_to_check:
-        years_to_check.append(years_to_check[-1] + 1)
     data = {}
     for message in messages:
         year = int(
@@ -52,10 +42,30 @@ def get_yearly_message_count(messages):
     return data
 
 
+def get_average_messages_a_day(messages):
+    data = {}
+    days_messages = [messages[0]]
+    for message in messages:
+        day = datetime.strptime(
+            days_messages[0].get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
+        ).strftime("%Y-%m-%d")
+        if (
+            datetime.strptime(
+                message.get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
+            ).strftime("%Y-%m-%d")
+            == day
+        ):
+            days_messages.append(message)
+        else:
+            data[day] = len(days_messages)
+            days_messages = [message]
+
+    average_messages = len(messages) / len(data.values())
+    return average_messages
+
+
 def main(data_to_parse, date_range_start, date_range_end, function):
-    messages, participants = get_data_to_parse(
-        data_to_parse, date_range_start, date_range_end
-    )
+    messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
 
     if function == "longest-message":
         longest_message = get_longest_message(messages)
@@ -66,6 +76,9 @@ def main(data_to_parse, date_range_start, date_range_end, function):
     if function == "yearly-message-count":
         yearly_message_count = get_yearly_message_count(messages)
         print(yearly_message_count)
+    if function == "average-messages":
+        average_messages = get_average_messages_a_day(messages)
+        print(average_messages)
 
 
 if __name__ == "__main__":
@@ -88,7 +101,12 @@ if __name__ == "__main__":
         "--function",
         type=str,
         required=True,
-        choices=["longest-message", "most-active", "yearly-message-count"],
+        choices=[
+            "longest-message",
+            "most-active",
+            "yearly-message-count",
+            "average-messages",
+        ],
     )
 
     args = parser.parse_args()

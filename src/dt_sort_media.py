@@ -1,10 +1,8 @@
 import argparse
 import datetime
-import json
 import os
-import sys
 
-from utils import get_data_to_parse, initial_file_load, load_json, write_to_file
+from utils import initial_file_load, load_json, write_to_file
 
 
 def update_media(message, media_object, media_index, media_file, path):
@@ -83,6 +81,8 @@ def main(dir_to_scan, print_logs, all_child_dirs, media_type):
 
 
 if __name__ == "__main__":
+    media_type_choices = ["photos", "videos", "files", "audio", "gifs"]
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--dir", type=str, required=True)
     parser.add_argument("-q", "--quiet", type=bool)
@@ -91,13 +91,9 @@ if __name__ == "__main__":
         "-sm",
         "--mediatype",
         type=str,
-        choices=["photos", "videos", "files", "audio", "gifs"],
+        choices=media_type_choices,
     )
 
     args = parser.parse_args()
-    for media_type in (
-        [args.mediatype]
-        if args.mediatype
-        else ["photos", "videos", "files", "audio", "gifs"]
-    ):
+    for media_type in [args.mediatype] if args.mediatype else media_type_choices:
         main(args.dir, args.quiet, args.childdirs, media_type)

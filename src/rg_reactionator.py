@@ -161,7 +161,7 @@ if __name__ == "__main__":
         "--saveallemojis",
         type=bool,
         default=False,
-        help="Save all the reacted messages in the json",
+        help="Save all the emojis messages in the json",
     )
     args = parser.parse_args()
 

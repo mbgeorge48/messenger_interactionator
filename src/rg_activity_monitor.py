@@ -64,6 +64,22 @@ def get_average_messages_a_day(messages):
     return average_messages
 
 
+def get_busiest_weekday(messages):
+    # Monday is 0 and Sunday is 6
+    data = {}
+    for message in messages:
+        day = int(
+            datetime.strptime(
+                message.get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
+            ).weekday()
+        )
+        try:
+            data[day] += 1
+        except KeyError:
+            data[day] = 1
+    return data
+
+
 def main(data_to_parse, date_range_start, date_range_end, function):
     messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
 
@@ -79,6 +95,9 @@ def main(data_to_parse, date_range_start, date_range_end, function):
     if function == "average-messages":
         average_messages = get_average_messages_a_day(messages)
         print(average_messages)
+    if function == "busiest-day":
+        busiest_day = get_busiest_weekday(messages)
+        print(busiest_day)
 
 
 if __name__ == "__main__":
@@ -106,6 +125,7 @@ if __name__ == "__main__":
             "most-active",
             "yearly-message-count",
             "average-messages",
+            "busiest-day",
         ],
     )
 
@@ -117,9 +137,3 @@ if __name__ == "__main__":
         args.drend,
         args.function,
     )
-
-
-# TODO
-# Longest Message
-# Most active particpant
-# Average message during period of times

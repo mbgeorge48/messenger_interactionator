@@ -99,7 +99,7 @@ These scripts take a few common params for them to be able to run, those are:
 -   `--multichat`
     -   If you want to read multiple group chats you can set this to `true`
         -   Doing so will change the function of `--file`, that file you pass in needs be a json file that is just an array of paths to read. Like this:
-            -   EXAMPLE NEEDED
+            -   `["/path/to/group/chat/folder-a/", "/path/to/group/chat/folder-b/", ... ]`
     -   type = `boolean`
     -   required = `false`
 -   `--drstart`
@@ -129,18 +129,20 @@ The `rg_activity_monitor` script does a handful of smaller functions to get spec
 -   -   Gets the number of messages sent a year, for each year from the first message to the current year.
 -   average-messages
     -   Gets the average number of messages a day.
+-   busiest-day
+    -   Gets the total message sent on each weekday.
 
 It doesn't write these to results files like the others.
 
 ```bash
-python3 src/rg_activity_monitor.py /path/to/messages.json
+python3 src/rg_activity_monitor.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
 
 -   `--function`
     -   Choices string to select your function.
-        -   `longest-message`, `most-active`, `yearly-message-count`, `average-messages`.
+        -   `longest-message`, `most-active`, `yearly-message-count`, `average-messages`, `busiest-day`.
     -   type = `boolean`
     -   required = `false`
 
@@ -153,7 +155,7 @@ The `rg_media_mogul` script reads through the messages and counts up how much me
 Writes the results to `media_mogul_results.json` when it's finished.
 
 ```bash
-python3 src/rg_media_mogul.py /path/to/messages.json
+python3 src/rg_media_mogul.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -182,7 +184,7 @@ This script gathers a handful of stats about the nicknames that have been set in
 Writes the results to `media_mogul_results.json` when it's finished.
 
 ```bash
-python3 src/rg_nicknamers.py /path/to/messages.json
+python3 src/rg_nicknamers.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -202,7 +204,7 @@ It returns 2 data sets:
 Writes the results to `potty_patrol_results.json` when it's finished.
 
 ```bash
-python3 src/rg_potty_patrol.py /path/to/messages.json
+python3 src/rg_potty_patrol.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -241,7 +243,7 @@ When you're selecting your emoji, it breaks the choice down into these emojis:
 Writes the results to `reactionator_results.json` when it's finished.
 
 ```bash
-python3 src/rg_reactionator.py /path/to/messages.json
+python3 src/rg_reactionator.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -270,7 +272,7 @@ python3 src/rg_reactionator.py /path/to/messages.json
 This script needs a bunch more time in the oven, it does a word count on all the messages and prints a list of them all along with their count.
 
 ```bash
-python3 src/rg_unique_words.py /path/to/messages.json
+python3 src/rg_unique_words.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**

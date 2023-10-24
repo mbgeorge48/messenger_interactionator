@@ -1,12 +1,8 @@
 import argparse
 import operator
 
-from utils import (
-    get_data_to_parse,
-    initial_file_load,
-    initialise_counter_dict,
-    write_to_file,
-)
+from utils import (get_data_to_parse, initial_file_load,
+                   initialise_counter_dict, write_to_file)
 
 
 def get_all_reacted_messages(messages, min_reactions_length=0):

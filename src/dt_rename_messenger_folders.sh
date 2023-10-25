@@ -1,7 +1,7 @@
 #!/bin/bash
 
 [[ -z "$1" ]] && {
-    echo "Pass in a directory to scan, i.e. $HOME/Documents/folder"
+    echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
     exit 1
 }
 

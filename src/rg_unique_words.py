@@ -19,7 +19,7 @@ from utils import (
 # Handle the paths not existing
 def main(data_to_parse, date_range_start, date_range_end, emojis_only):
     messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
-    all_words = {}
+    word_data = {}
 
     print(
         f"Total Number of messages since {datetime.datetime.fromtimestamp(messages[0]['timestamp_ms']/1000).strftime('%Y-%m-%d %H:%M:%S')}: {len(messages)}"
@@ -36,27 +36,25 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only):
                     formatted_word = word
                 if "http" not in formatted_word and not formatted_word.isnumeric():
                     if (emojis_only and word_is_emoji) or emojis_only is not True:
-                        if formatted_word in all_words.keys():
-                            all_words[formatted_word] = all_words[formatted_word] + 1
+                        if formatted_word in word_data.keys():
+                            word_data[formatted_word]["count"] = (
+                                word_data[formatted_word]["count"] + 1
+                            )
                         else:
-                            all_words[formatted_word] = 1
+                            word_data.update(
+                                {
+                                    formatted_word: {
+                                        "count": 1,
+                                        "op": message["sender_name"],
+                                    }
+                                }
+                            )
         except Exception:
             continue
     alphabetical_order = dict(
-        sorted(all_words.items(), key=lambda item: item[0], reverse=True)
+        sorted(word_data.items(), key=lambda item: item[0], reverse=True)
     )
-    print(
-        json.dumps(
-            dict(
-                sorted(
-                    alphabetical_order.items(), key=lambda item: item[1], reverse=True
-                )
-            ),
-            indent=4,
-            separators=(",", ": "),
-            ensure_ascii=False,
-        )
-    )
+    write_to_file("unique_words.json", alphabetical_order)
 
 
 if __name__ == "__main__":

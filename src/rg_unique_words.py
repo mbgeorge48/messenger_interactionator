@@ -51,10 +51,8 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only):
                             )
         except Exception:
             continue
-    alphabetical_order = dict(
-        sorted(word_data.items(), key=lambda item: item[0], reverse=True)
-    )
-    write_to_file("unique_words.json", alphabetical_order)
+    data = dict(sorted(word_data.items(), key=lambda item: item[1]["count"]))
+    write_to_file("unique_words.json", data)
 
 
 if __name__ == "__main__":

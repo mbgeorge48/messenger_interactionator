@@ -66,7 +66,15 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only):
                         )
         except KeyError:
             continue
+
     data = dict(sorted(word_data.items(), key=lambda item: item[1]["count"]))
+    sender_count = {}
+    for word in data:
+        if data[word]["op"] in sender_count.keys():
+            sender_count[data[word]["op"]] = sender_count[data[word]["op"]] + 1
+        else:
+            sender_count[data[word]["op"]] = 1
+    data["sender count"] = sender_count
     write_to_file("unique_words.json", data)
 
 
@@ -84,7 +92,9 @@ if __name__ == "__main__":
         type=str,
         help="The date range end for getting messages, format needs to be (YYYY-MM)",
     )
-    parser.add_argument("--emojis", type=bool, default=False)
+    parser.add_argument(
+        "--emojis", type=bool, default=False, help="Only count emojis rather than words"
+    )
 
     args = parser.parse_args()
 
@@ -95,5 +105,4 @@ if __name__ == "__main__":
         args.emojis,
     )
 
-
-# Want to do a group by thing so I can find out specifics about people
+# Want to be able to compare a date range to the full maximum date range

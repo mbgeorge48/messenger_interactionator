@@ -88,15 +88,50 @@ def find_each_participants_biggest_fan(all_reacted_messages):
 
 def get_emjois_to_search(emojis_key):
     if emojis_key == "laugh":
-        return ["😅", "😂", "🤣", "😆"]
+        # return ["😅", "😂", "🤣", "😆"]
+        return [
+            ":grinning_squinting_face:",
+            ":grinning_face_with_sweat:",
+            ":rolling_on_the_floor_laughing:",
+            ":face_with_tears_of_joy:",
+        ]
     if emojis_key == "heart":
-        return ["😍", "❤", "💜", "💗", "🥰", "💛", "💙", "💚"]
+        # return ["😍", "❤", "💜", "💗", "🥰", "💛", "💙", "💚"]
+        return [
+            ":red_heart:",
+            ":pink_heart:",
+            ":orange_heart:",
+            ":yellow_heart:",
+            ":green_heart:",
+            ":blue_heart:",
+            ":light_blue_heart:",
+            ":purple_heart:",
+            ":brown_heart:",
+            ":black_heart:",
+            ":grey_heart:",
+            ":white_heart:",
+            ":smiling_face_with_heart_eyes:",
+            ":smiling_face_with_hearts:",
+        ]
     if emojis_key == "thumb":
-        return ["👍", " 👍🏻" ",👍🏾", "👍🏽", "👍🏼", "👍🏿"]
+        # return ["👍", " 👍🏻" ",👍🏾", "👍🏽", "👍🏼", "👍🏿"]
+        return [
+            ":face_with_steam_from_nose:",
+            ":enraged_face:",
+            ":angry_face:",
+            ":face_with_symbols_on_mouth:",
+        ]
     if emojis_key == "shock":
-        return ["😲", "🤯", "😮"]
+        # return ["😲", "🤯", "😮"]
+        return [":exploding_head:", ":face_with_open_mouth:", ":astonished_face:"]
     if emojis_key == "anger":
-        return ["🤬", "😠"]
+        # return ["🤬", "😠"]
+        return [
+            ":face_with_steam_from_nose:",
+            ":enraged_face:",
+            ":angry_face:",
+            ":face_with_symbols_on_mouth:",
+        ]
 
 
 def main(

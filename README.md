@@ -281,5 +281,6 @@ _None_
 
 ## TODO
 
-Update date readme with the correct files that get generated
-Add the black heart to the heart emojis
+-   Update date readme with the correct files that get generated
+-   Add the black heart to the heart emojis
+-   Fix the disk size check in the unzip and merge script

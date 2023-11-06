@@ -2,6 +2,8 @@ import datetime
 import json
 import os
 import sys
+from datetime import datetime
+import calendar
 
 import argparse
 import operator
@@ -38,22 +40,51 @@ def emoji_or_noji(word, emojis_only):
     return False
 
 
-# Handle the paths not existing
-def main(data_to_parse, date_range_start, date_range_end, emojis_only):
-    messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
-    word_data = {}
-
-    print(
-        f"Total Number of messages since {datetime.datetime.fromtimestamp(messages[0]['timestamp_ms']/1000).strftime('%Y-%m-%d %H:%M:%S')}: {len(messages)}"
-    )
-    for message in messages:
+def list_every_word(all_messages, emojis_only):
+    all_words = []
+    for message in all_messages:
         try:
             for word in message["content"].split(" "):
                 formatted_word = verified_word(word)
                 if emoji_or_noji(formatted_word, emojis_only):
+                    all_words.append(formatted_word)
+        except KeyError:
+            continue
+    return list(dict.fromkeys(all_words))
+
+
+# Handle the paths not existing
+def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_year):
+    all_previous_years_words = {}
+    if compare_year:
+        today = datetime.now()
+        messages, _ = get_data_to_parse(
+            data_to_parse, "-".join([str(today.year), "01"]), None
+        )
+        all_messages, _ = get_data_to_parse(
+            data_to_parse,
+            None,
+            "-".join([str(today.year - 1), "12"]),
+        )
+        all_previous_years_words = list_every_word(all_messages, emojis_only)
+    else:
+        messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
+    word_data = {}
+
+    for message in messages:
+        try:
+            for word in message["content"].split(" "):
+                formatted_word = verified_word(word)
+                if (
+                    emoji_or_noji(formatted_word, emojis_only)
+                    and formatted_word not in all_previous_years_words
+                ):
                     if formatted_word in word_data.keys():
-                        word_data[formatted_word]["count"] = (
-                            word_data[formatted_word]["count"] + 1
+                        word_data[formatted_word].update(
+                            {
+                                "count": word_data[formatted_word]["count"] + 1,
+                                "op": message["sender_name"],
+                            }
                         )
                     else:
                         word_data.update(
@@ -95,6 +126,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--emojis", type=bool, default=False, help="Only count emojis rather than words"
     )
+    parser.add_argument(
+        "--compareyear",
+        type=bool,
+        default=False,
+        help="Compare the current year to the previous years",
+    )
 
     args = parser.parse_args()
 
@@ -103,6 +140,7 @@ if __name__ == "__main__":
         args.drstart,
         args.drend,
         args.emojis,
+        args.compareyear,
     )
 
 # Want to be able to compare a date range to the full maximum date range

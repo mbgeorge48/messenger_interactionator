@@ -10,18 +10,20 @@ function check_space {
 function unzip_time {
     mkdir -p unzipped
     # If the total uncompressed space is less than 70% of the remaining disk space don't start unzipping
-    if [ $((DISK_SPACE * 90 / 100)) -gt $total_space ] || [ IGNORE_SPACE_CHECK = true ]; then
-        echo "Starting to unzip"
-        for zip in $(find . -type f -name "*.zip"); do
-            FILE=${zip%.zip*}
-            echo "Unzipping $FILE"
-            unzip -q $zip -d /Volumes/Camera\ Roll/fb/unzipped/$FILE
-        done
-    else
-        echo $DISK_SPACE
-        echo $total_space
-        echo "Not enough disk space"
-    fi
+    # if [ $((DISK_SPACE * 70 / 100)) -gt $total_space ] || [ IGNORE_SPACE_CHECK = true ]; then
+    echo "Starting to unzip"
+    for filename in $(find . -type f -name "*.zip"); do
+        FILE=${filename%.zip*}
+        echo "Unzipping $FILE"
+        # Ensure unzip is installed
+        # sudo apt install unzip
+        unzip -q $filename -d unzipped/$FILE
+    done
+    # else
+    #     echo $DISK_SPACE
+    #     echo $total_space
+    #     echo "Not enough disk space"
+    # fi
 }
 
 function merging_time {
@@ -44,7 +46,7 @@ function tidy_up {
 }
 
 # Would need to be tweaked to make it work on Linux
-DISK_SPACE=$(diskutil info /dev/disk3s1s1 | grep 'Container Free Space' | awk '{print substr($6,2) }')
+# DISK_SPACE=$(diskutil info /dev/disk3s1s1 | grep 'Container Free Space' | awk '{print substr($6,2) }')
 IGNORE_SPACE_CHECK=true
 
 [[ -z "$1" ]] && {

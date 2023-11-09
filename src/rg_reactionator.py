@@ -151,13 +151,16 @@ def main(
     all_reacted_messages = get_all_reacted_messages(messages)
     if saveallreacts:
         reaction_data["reacted_messages"] = all_reacted_messages
+    else:
+        reaction_data["top_five_reacted_messages"] = all_reacted_messages[:10]
     reaction_data["times_reacted"] = find_most_and_least_reactive_participant(
         all_reacted_messages, participants
     )
     emojis = get_emjois_to_search(emojis_key)
-    reaction_data[f"reaction_counter-{emojis_key}"] = find_most_likely_to_react_with(
+    reaction_data[f"reaction_counter_{emojis_key}"] = find_most_likely_to_react_with(
         all_reacted_messages, emojis, reaction_counter
     )
+    reaction_data[f"reaction_counter_{emojis_key}_sum"] = sum(reaction_data[f"reaction_counter_{emojis_key}"].values())
     if saveallemojis:
         reaction_data["emoji_counter"] = find_most_common_reaction(all_reacted_messages)
     reaction_data["fan_zone"] = find_each_participants_biggest_fan(all_reacted_messages)

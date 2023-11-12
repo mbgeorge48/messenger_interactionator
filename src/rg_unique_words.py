@@ -9,8 +9,13 @@ from datetime import datetime
 
 from emoji import emojize, is_emoji
 
-from utils import (encode_string, get_data_to_parse, initial_file_load,
-                   initialise_counter_dict, write_to_file)
+from utils import (
+    encode_string,
+    get_data_to_parse,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 
 def verified_word(word):

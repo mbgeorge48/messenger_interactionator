@@ -3,8 +3,13 @@ import collections
 import datetime
 import re
 
-from utils import (get_data_to_parse, get_your_name, initial_file_load,
-                   initialise_counter_dict, write_to_file)
+from utils import (
+    get_data_to_parse,
+    get_your_name,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 YOUR_NAME = get_your_name()
 

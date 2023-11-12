@@ -53,11 +53,11 @@ I'll eventaully combine the two scripts into one, as the only real difference is
 You don't need to do that anymore, when I originally made all these scripts it used the grouped up data to get the results.
 
 ```bash
-python3 src/dt_format_message_data.py $HOME/path/to/zip/files/merged
+python src/dt_format_message_data.py $HOME/path/to/zip/files/merged
 ```
 
 ```bash
-python3 src/dt_group_message_data.py $HOME/path/to/zip/files/merged
+python src/dt_group_message_data.py $HOME/path/to/zip/files/merged
 ```
 
 ---
@@ -82,7 +82,7 @@ You can run the `dt_rename_messenger_folders.sh` before running the `dt_format_m
 The last bit of data transformation you can do run is the `dt_sort_media.py`. This renames all the media in a groups folder to be the sender name and timestamp of the message, it's not totally necessary howver if you're running one of the result generator scripts it makes the output a bit nicer to read.
 
 ```bash
-python3 src/dt_sort_media.py $HOME/path/to/specific/group/chat/folder
+python src/dt_sort_media.py $HOME/path/to/specific/group/chat/folder
 ```
 
 It's also not 100% tested at the time of writing...
@@ -130,12 +130,12 @@ The `rg_activity_monitor` script does a handful of smaller functions to get spec
 -   average-messages
     -   Gets the average number of messages a day.
 -   busiest-day
-    -   Gets the total message sent on each weekday.
+    -   Gets the total message sent on each day.
 
 It doesn't write these to results files like the others.
 
 ```bash
-python3 src/rg_activity_monitor.py /path/to/group/chat/folder/
+python src/rg_activity_monitor.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -155,7 +155,7 @@ The `rg_media_mogul` script reads through the messages and counts up how much me
 Writes the results to `media_mogul_results.json` when it's finished.
 
 ```bash
-python3 src/rg_media_mogul.py /path/to/group/chat/folder/
+python src/rg_media_mogul.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -184,7 +184,7 @@ This script gathers a handful of stats about the nicknames that have been set in
 Writes the results to `media_mogul_results.json` when it's finished.
 
 ```bash
-python3 src/rg_nicknamers.py /path/to/group/chat/folder/
+python src/rg_nicknamers.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -204,7 +204,7 @@ It returns 2 data sets:
 Writes the results to `potty_patrol_results.json` when it's finished.
 
 ```bash
-python3 src/rg_potty_patrol.py /path/to/group/chat/folder/
+python src/rg_potty_patrol.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -243,7 +243,7 @@ When you're selecting your emoji, it breaks the choice down into these emojis:
 Writes the results to `reactionator_results.json` when it's finished.
 
 ```bash
-python3 src/rg_reactionator.py /path/to/group/chat/folder/
+python src/rg_reactionator.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
@@ -272,9 +272,16 @@ python3 src/rg_reactionator.py /path/to/group/chat/folder/
 This script needs a bunch more time in the oven, it does a word count on all the messages and prints a list of them all along with their count.
 
 ```bash
-python3 src/rg_unique_words.py /path/to/group/chat/folder/
+python src/rg_unique_words.py /path/to/group/chat/folder/
 ```
 
 **Additional Params**
 
 _None_
+
+## TODO
+
+-   Update date readme with the correct files that get generated
+-   Add the black heart to the heart emojis
+-   Fix the disk size check in the unzip and merge script
+-   update emojis in the list

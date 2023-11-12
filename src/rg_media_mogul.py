@@ -136,10 +136,14 @@ def main(
         data["specific_participant"] = get_media_detail_sent_by_specific_participant(
             all_media_sent_messages, specific_participant, specific_mediatype
         )
-
-    data["media_sent_totals"] = count_media_sent_by_participants(
-        all_media_sent_messages, media_sender
-    )
+    if specific_mediatype:
+        data[f"{specific_mediatype}_sent_totals"] = count_media_sent_by_participants(
+            all_media_sent_messages, media_sender
+        )
+    else:
+        data["media_sent_totals"] = count_media_sent_by_participants(
+            all_media_sent_messages, media_sender
+        )
     data[
         "media_sent_breakdowns_participant"
     ] = get_media_sent_by_participant_count_breakdowns(all_media_sent_messages)

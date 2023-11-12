@@ -13,10 +13,11 @@ def main(dirs_to_format):
             for file in os.listdir(full_path):
                 if re.search("^message.*?.json$", file):
                     json_string = load_json(os.path.join(full_path, file))
-                    json_string["title"] = encode_string(json_string.get("title"))
+                    orignal_title = json_string.get("title")
+                    json_string["title"] = encode_string(orignal_title)
                     for message in json_string["messages"]:
                         message = process_message_data(message)
-                    print(json_string.get("title"))  # Need better logging everywhere
+                    print(f'{orignal_title} becomes {json_string.get("title")}')
                     with open(os.path.join(full_path, file), "w") as f:
                         json.dump(json_string, f, indent=4, ensure_ascii=False)
 

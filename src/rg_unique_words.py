@@ -1,21 +1,16 @@
+import argparse
+import calendar
 import datetime
 import json
+import operator
 import os
 import sys
 from datetime import datetime
-import calendar
 
-import argparse
-import operator
-from emoji import is_emoji, emojize
+from emoji import emojize, is_emoji
 
-from utils import (
-    get_data_to_parse,
-    initial_file_load,
-    initialise_counter_dict,
-    write_to_file,
-    encode_string,
-)
+from utils import (encode_string, get_data_to_parse, initial_file_load,
+                   initialise_counter_dict, write_to_file)
 
 
 def verified_word(word):

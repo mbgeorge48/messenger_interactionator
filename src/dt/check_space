@@ -1,0 +1,20 @@
+#!/bin/bash
+
+[[ -z "$1" ]] && {
+    echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
+    exit 1
+}
+cd $1
+
+DISK_SPACE=$(df -P . | tail -1 | awk '{print $4}')
+# DISK_SPACE=$(diskutil info /dev/disk3s1s1 | grep 'Container Free Space' | awk '{print substr($9,2) }')
+IGNORE_SPACE_CHECK=true
+total_space=0
+
+echo "Checking Space"
+for zip in $(find . -type f -name "*.zip"); do
+    ((total_space += $(unzip -Zt $zip | awk '{print $6}')))
+done
+
+# Maybe return 0 or 1 depending on the outcome
+# Then in other scripts you can check the value of this script

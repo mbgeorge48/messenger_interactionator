@@ -1,0 +1,18 @@
+#!/bin/bash
+
+initial_dir=$(pwd)
+
+[[ -z "$1" ]] && {
+  echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
+  exit 1
+}
+cd $1
+
+# check file space
+
+echo "Rezipping"
+# zip -r fb-$(date "+%Y-%m-%d").zip merged/* >>$initial_dir/data-transform.log
+(cd merged && zip -r ../fb-$(date "+%Y-%m-%d").zip . >>$initial_dir/data-transform.log)
+
+echo "Tidying up"
+# rm -rf merged unzipped

@@ -2,6 +2,12 @@
 
 initial_dir=$(pwd)
 
+if ! [ $(command -v zip) ]; then
+  echo "Check you have the zip command installed"
+  echo "sudo apt install zip"
+  exit 1
+fi
+
 [[ -z "$1" ]] && {
   echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
   exit 1
@@ -11,8 +17,9 @@ cd $1
 # check file space
 
 echo "Rezipping"
-# zip -r fb-$(date "+%Y-%m-%d").zip merged/* >>$initial_dir/data-transform.log
+# Maybe look at zipping up the files in "photos", "videos", "files", "audio", "gifs" prior to doing the main zipping
+# Longer up front but easier to unzip later
 (cd merged && zip -r ../fb-$(date "+%Y-%m-%d").zip . >>$initial_dir/data-transform.log)
 
 echo "Tidying up"
-# rm -rf merged unzipped
+rm -rf merged unzipped

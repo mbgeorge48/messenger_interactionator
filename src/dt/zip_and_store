@@ -1,28 +1,29 @@
 #!/bin/bash
 
+set -e
+
+cd "$(dirname "$0")/../.."
+
 initial_dir=$(pwd)
 
 if ! [ $(command -v zip) ]; then
-  echo "Check you have the zip command installed"
-  echo "sudo apt install zip"
-  exit 1
+    echo "Check you have the zip command installed"
+    echo "sudo apt install zip"
+    exit 1
 fi
 
 [[ -z "$1" ]] && {
-  echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
-  exit 1
+    echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
+    exit 1
 }
-cd $1
 
-# check file space
-
-echo "Zipping media"
 for folder in "photos" "videos" "files" "gifs" "audio"; do
-  find . -name $folder -type d -exec sh -c "cd {}/.. ; zip -rm $folder.zip $folder" \; 2>/dev/null
+    src/dt/zip_media $1 $folder
 done
 
+# Want to check file space around here
 echo "Rezipping"
-(cd merged && zip -rm ../fb-$(date "+%Y-%m-%d").zip . >>$initial_dir/data-transform.log)
+(cd $1/merged && zip -rm ../fb-$(date "+%Y-%m-%d").zip . >>$initial_dir/data-transform.log)
 
 echo "Tidying up"
-rm -rf merged unzipped
+rm -rf $1/merged $1/unzipped

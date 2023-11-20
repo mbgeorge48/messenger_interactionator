@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if ! [ $(command -v zip) ]; then
+    echo "Check you have the zip command installed"
+    echo "sudo apt install zip"
+    exit 1
+fi
+
+[[ -z "$1" ]] && {
+    echo "Pass in a directory to process, i.e. $HOME/Documents/folder"
+    exit 1
+}
+cd $1
+
+echo "Zipping media - $2"
+find merged -name $2 -type d -exec sh -c "cd {}/.. ; zip -rm $2.zip $2" \; 2>/dev/null

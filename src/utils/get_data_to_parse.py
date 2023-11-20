@@ -4,15 +4,20 @@ from datetime import datetime
 import utils
 
 
+def convert_string_to_date(date_string):
+    return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+
+
 def date_filter(messages, date_range):
-    if (
-        messages[0]["timestamp_converted"] > date_range["start"]
-        and messages[-1]["timestamp_converted"] < date_range["end"]
-    ):
+    latest_message = convert_string_to_date(messages[0]["timestamp_converted"])
+    earliest_message = convert_string_to_date(messages[-1]["timestamp_converted"])
+    date_range_start = convert_string_to_date(date_range["start"])
+    date_range_end = convert_string_to_date(date_range["end"])
+
+    if latest_message > date_range_end and earliest_message < date_range_start:
         return messages
     elif (
-        not messages[0]["timestamp_converted"] > date_range["start"]
-        and not messages[-1]["timestamp_converted"] < date_range["end"]
+        not latest_message > date_range_start and not earliest_message < date_range_end
     ):
         return []
 
@@ -27,8 +32,9 @@ def date_filter(messages, date_range):
 def convert_date(date_string, end_of_month=False):
     try:
         date = datetime.strptime(date_string, "%Y-%m")
-    except:
+    except ValueError:
         date = date_string
+
     if end_of_month:
         date = date.replace(
             day=calendar.monthrange(date.year, date.month)[1],
@@ -48,7 +54,7 @@ def get_data_to_parse(data_to_parse, date_range_start, date_range_end):
         date_range_end if date_range_end else datetime.today().strftime("%Y-%m"),
         True,
     )
-
+    print(date_range)
     data = []
     for file in data_to_parse:
         data.append(utils.read_message_file(file))

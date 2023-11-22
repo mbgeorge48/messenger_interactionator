@@ -16,5 +16,13 @@ for zip in $(find . -type f -name "*.zip"); do
     ((total_space += $(unzip -Zt $zip | awk '{print $6}')))
 done
 
+if [ $((DISK_SPACE * 70 / 100)) -lt $total_space ] && [ $IGNORE_SPACE_CHECK = false ]; then
+    echo "Not enough disk space in $1"
+    echo "Update the value of IGNORE_SPACE_CHECK to ignore this check"
+    echo "Remaining disk space => $DISK_SPACE"
+    echo "Total space required => $total_space"
+    exit 1
+fi
+
 # Maybe return 0 or 1 depending on the outcome
 # Then in other scripts you can check the value of this script

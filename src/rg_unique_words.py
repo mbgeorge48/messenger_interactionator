@@ -1,33 +1,45 @@
+#!/usr/bin/env python
+# export PYENCHANT_LIBRARY_PATH=/opt/homebrew/lib/libenchant-2.dylib
+
 import argparse
-import calendar
 import datetime
-import json
-import operator
-import os
-import sys
-from datetime import datetime
-
 from emoji import emojize, is_emoji
-
 from utils import (
     encode_string,
     get_data_to_parse,
     initial_file_load,
-    initialise_counter_dict,
     write_to_file,
 )
+from string import punctuation
+import enchant
+
+d = enchant.Dict("en_GB")
+
+invalid_words = []
 
 
 def verified_word(word):
-    if "http" not in word and not word.isnumeric():
-        if not is_emoji(emojize(word)):
-            return "".join(
-                e for e in encode_string(word, emojize=True) if e.isalnum()
-            ).lower()
-        else:
-            return word
-    else:
+    # Check for http in word
+    if "http" in word:
+        invalid_words.append(word)
         return None
+    # Check if the word is numeric
+    if word.isnumeric():
+        invalid_words.append(word)
+        return None
+    # Check if the word is an emoji
+    if is_emoji(emojize(word)):
+        invalid_words.append(word)
+        return None
+    # Check if the word is valid according to pyenchant
+    if not d.check(word.strip(punctuation)):
+        invalid_words.append(word)
+        return None
+
+    cleaned_word = "".join(
+        e for e in encode_string(word, emojize=True) if e.isalnum()
+    ).lower()
+    return cleaned_word
 
 
 def emoji_or_noji(word, emojis_only):
@@ -105,7 +117,9 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_y
             sender_count[data[word]["op"]] = sender_count[data[word]["op"]] + 1
         else:
             sender_count[data[word]["op"]] = 1
-    data["sender count"] = sender_count
+    data["sender_count"] = sender_count
+    data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
+
     write_to_file("unique_words.json", data)
 
 

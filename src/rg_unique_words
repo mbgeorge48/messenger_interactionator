@@ -15,6 +15,7 @@ from utils import (
 )
 from string import punctuation
 import enchant
+import os
 
 d = enchant.Dict("en_GB")
 
@@ -75,7 +76,6 @@ def list_every_word(all_messages, emojis_only):
     return list(all_words)
 
 
-# Handle the paths not existing
 def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_year):
     all_previous_years_words = set()
 
@@ -156,13 +156,11 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    main(
-        initial_file_load(args.file, args.multichat),
-        args.drstart,
-        args.drend,
-        args.emojis,
-        args.compareyear,
-    )
-
-# Want to be able to compare a date range to the full maximum date range
+    if os.path.exists(args.file):
+        main(
+            initial_file_load(args.file, args.multichat),
+            args.drstart,
+            args.drend,
+            args.emojis,
+            args.compareyear,
+        )

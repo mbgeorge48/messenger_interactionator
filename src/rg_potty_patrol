@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 import argparse
 
 from utils import (
@@ -10,38 +13,42 @@ from utils import (
 
 
 def get_all_naughty_messages(messages, potty_words, potty_mouth_counter):
-    partipant_specific_count = {}
+    participant_specific_count = {}
+
     for message in messages:
-        try:
-            partipant_specific_count[message["sender_name"]]
-        except KeyError:
-            partipant_specific_count[message["sender_name"]] = {}
-        if not message.get("content"):
+        sender_name = message["sender_name"]
+        content = message.get("content", "")
+
+        # Skip messages with no content
+        if not content:
             continue
+
+        # Initialize counters for the sender
+        participant_specific_count.setdefault(sender_name, {})
+        potty_mouth_counter.setdefault(sender_name, 0)
+
+        # Check for potty words in the message content
         for potty_word in potty_words:
-            if potty_word in message.get("content").lower():
-                try:
-                    potty_mouth_counter[message["sender_name"]] += 1
-                except KeyError:
-                    potty_mouth_counter[message["sender_name"]] = 0
-                    potty_mouth_counter[message["sender_name"]] += 1
+            if potty_word in content.lower():
+                # Update overall counter for the sender
+                potty_mouth_counter[sender_name] += 1
 
-                try:
-                    partipant_specific_count[message["sender_name"]][potty_word] += 1
-                except KeyError:
-                    partipant_specific_count[message["sender_name"]][potty_word] = 0
-                    partipant_specific_count[message["sender_name"]][potty_word] += 1
+                # Update specific counter for the sender and potty word
+                participant_specific_count[sender_name][potty_word] = (
+                    participant_specific_count[sender_name].get(potty_word, 0) + 1
+                )
 
-    for participant in partipant_specific_count:
-        partipant_specific_count[participant] = dict(
+    # Sort specific counters for each participant
+    for participant in participant_specific_count:
+        participant_specific_count[participant] = dict(
             sorted(
-                partipant_specific_count[participant].items(),
+                participant_specific_count[participant].items(),
                 key=lambda item: item[1],
                 reverse=True,
             )
         )
 
-    return partipant_specific_count, potty_mouth_counter
+    return participant_specific_count, potty_mouth_counter
 
 
 def main(

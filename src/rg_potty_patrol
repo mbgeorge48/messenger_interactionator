@@ -51,29 +51,31 @@ def get_all_naughty_messages(messages, potty_words, potty_mouth_counter):
     return participant_specific_count, potty_mouth_counter
 
 
-def main(
-    data_to_parse,
-    date_range_start,
-    date_range_end,
-    potty_file,
-):
+def main(data_to_parse, date_range_start, date_range_end, potty_file):
+    # Get messages and participants
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
     )
+
+    # Load potty words from file
     potty_words = load_json(potty_file)
 
-    data = {}
+    # Initialize counters
     potty_mouth_counter = initialise_counter_dict(participants)
-    partipant_specific_count, potty_mouth_counter = get_all_naughty_messages(
+
+    # Get naughty messages counts
+    participant_specific_count, potty_mouth_counter = get_all_naughty_messages(
         messages, potty_words, potty_mouth_counter
     )
-    data["partipant_specific_count"] = partipant_specific_count
-    data["potty_mouth_counter"] = potty_mouth_counter
 
-    write_to_file(
-        "potty_patrol_results.json",
-        data,
-    )
+    # Prepare data for writing to file
+    data = {
+        "participant_specific_count": participant_specific_count,
+        "potty_mouth_counter": potty_mouth_counter,
+    }
+
+    # Write results to file
+    write_to_file("potty_patrol_results.json", data)
 
 
 if __name__ == "__main__":

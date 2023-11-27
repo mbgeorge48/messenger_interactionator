@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import operator
 
@@ -66,16 +68,12 @@ def find_most_common_reaction(all_reacted_messages):
 def find_each_participants_biggest_fan(all_reacted_messages):
     fan_zone = {}
     for message in all_reacted_messages:
-        try:
-            fan_zone[message["sender_name"]]
-        except KeyError:
-            fan_zone[message["sender_name"]] = {}
-        for reaction in message["reactions"]:
-            try:
-                fan_zone[message["sender_name"]][reaction["actor"]] += 1
-            except KeyError:
-                fan_zone[message["sender_name"]][reaction["actor"]] = 0
-                fan_zone[message["sender_name"]][reaction["actor"]] += 1
+        sender_name = message["sender_name"]
+        fan_zone.setdefault(sender_name, {})
+
+        for reaction in message.get("reactions", []):
+            actor = reaction["actor"]
+            fan_zone[sender_name][actor] = fan_zone[sender_name].get(actor, 0) + 1
 
     for participant in fan_zone:
         fan_zone[participant] = dict(
@@ -88,7 +86,6 @@ def find_each_participants_biggest_fan(all_reacted_messages):
 
 def get_emjois_to_search(emojis_key):
     if emojis_key == "laugh":
-        # return ["😅", "😂", "🤣", "😆"]
         return [
             ":grinning_squinting_face:",
             ":grinning_face_with_sweat:",
@@ -96,7 +93,6 @@ def get_emjois_to_search(emojis_key):
             ":face_with_tears_of_joy:",
         ]
     if emojis_key == "heart":
-        # return ["😍", "❤", "💜", "💗", "🥰", "💛", "💙", "💚"]
         return [
             ":red_heart:",
             ":pink_heart:",
@@ -114,7 +110,6 @@ def get_emjois_to_search(emojis_key):
             ":smiling_face_with_hearts:",
         ]
     if emojis_key == "thumb":
-        # return ["👍", " 👍🏻" ",👍🏾", "👍🏽", "👍🏼", "👍🏿"]
         return [
             ":face_with_steam_from_nose:",
             ":enraged_face:",
@@ -122,16 +117,22 @@ def get_emjois_to_search(emojis_key):
             ":face_with_symbols_on_mouth:",
         ]
     if emojis_key == "shock":
-        # return ["😲", "🤯", "😮"]
         return [":exploding_head:", ":face_with_open_mouth:", ":astonished_face:"]
     if emojis_key == "anger":
-        # return ["🤬", "😠"]
         return [
             ":face_with_steam_from_nose:",
             ":enraged_face:",
             ":angry_face:",
             ":face_with_symbols_on_mouth:",
         ]
+
+
+def who_didnt_react(reacted_message, participants):
+    reactors = participants.copy()
+    for reaction in reacted_message.get("reactions", ""):
+        actor = reaction.get("actor", "")
+        reactors.remove(actor)
+    return reactors
 
 
 def main(
@@ -152,7 +153,12 @@ def main(
     if saveallreacts:
         reaction_data["reacted_messages"] = all_reacted_messages
     else:
-        reaction_data["top_five_reacted_messages"] = all_reacted_messages[:10]
+        top_results = 5
+        trimmed_reacted_messages = []
+        for message in all_reacted_messages[:top_results]:
+            message["who_didnt_react"] = who_didnt_react(message, participants)
+            trimmed_reacted_messages.append(message)
+        reaction_data[f"top_{top_results}_reacted_messages"] = trimmed_reacted_messages
     reaction_data["times_reacted"] = find_most_and_least_reactive_participant(
         all_reacted_messages, participants
     )

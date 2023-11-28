@@ -76,7 +76,14 @@ def list_every_word(all_messages, emojis_only):
     return list(all_words)
 
 
-def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_year):
+def main(
+    data_to_parse,
+    date_range_start,
+    date_range_end,
+    emojis_only,
+    capture_context,
+    compare_year,
+):
     all_previous_years_words = set()
 
     if compare_year:
@@ -104,7 +111,6 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_y
             sender_name = message.get("sender_name", "")
             for word in words:
                 formatted_word = verified_word(word)
-
                 if (
                     emoji_or_noji(formatted_word, emojis_only)
                     and formatted_word not in all_previous_years_words
@@ -116,6 +122,10 @@ def main(data_to_parse, date_range_start, date_range_end, emojis_only, compare_y
                             "count": 1,
                             "op": sender_name,
                         }
+                        if capture_context:
+                            word_data[formatted_word]["context"] = message.get(
+                                "content", ""
+                            )
                         sender_count[sender_name] = sender_count.get(sender_name, 0) + 1
         except KeyError:
             continue
@@ -149,6 +159,9 @@ if __name__ == "__main__":
         "--emojis", type=bool, default=False, help="Only count emojis rather than words"
     )
     parser.add_argument(
+        "--context", type=bool, default=False, help="Save the context of the word"
+    )
+    parser.add_argument(
         "--compareyear",
         type=bool,
         default=False,
@@ -162,5 +175,6 @@ if __name__ == "__main__":
             args.drstart,
             args.drend,
             args.emojis,
+            args.context,
             args.compareyear,
         )

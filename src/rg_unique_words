@@ -14,11 +14,11 @@ from utils import (
     write_to_file,
 )
 import nltk
-from nltk.corpus import stopwords, wordnet
+from nltk.corpus import stopwords
 from string import punctuation
 import enchant
 import os
-import syllapy
+
 
 d = enchant.Dict("en_GB")
 nltk.download("wordnet")
@@ -27,40 +27,6 @@ stop_words = set(stopwords.words("english"))
 
 invalid_words = []
 SAVE_INVALID_WORDS = False
-
-
-def score_word(word):
-    length_score = len(word)
-    age_score = 1
-    complexity_score = 1
-
-    synsets = wordnet.synsets(word)
-    if synsets:
-        earliest_synset = min(
-            synsets, key=lambda synset: min(synset.lemma_names()).split(".")[0]
-        )
-        language = earliest_synset.lexname().split(".")[0]
-        print(f"{word} => {earliest_synset}")
-        if language == "old_english":
-            age_score = 5.0
-        elif language == "middle_english":
-            age_score = 4.0
-        elif language == "early_modern_english":
-            age_score = 3.0
-        elif language == "english":
-            age_score = 2.0
-        else:
-            age_score = 1.0
-
-        definitions = earliest_synset.lemma_names()
-        num_definitions = len(definitions)
-        num_syllables = syllapy.count(word)
-        complexity_score = (num_definitions + 1) * (1 / (num_syllables + 1))
-
-    # print(f"{num_definitions}, {num_syllables}")
-    score = age_score * complexity_score
-
-    return score
 
 
 def verified_word(word):
@@ -161,7 +127,7 @@ def main(
                             "count": 1,
                             "op": sender_name,
                         }
-                        word_data[formatted_word]["score"] = score_word(word)
+                        # word_data[formatted_word]["score"] = score_word(word)
 
                         if capture_context:
                             word_data[formatted_word]["context"] = message.get(

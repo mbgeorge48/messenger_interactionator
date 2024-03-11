@@ -5,7 +5,6 @@ import os
 import re
 import sys
 
-
 from utils import encode_string, load_json, process_message_data
 
 

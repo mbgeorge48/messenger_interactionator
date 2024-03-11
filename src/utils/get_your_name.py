@@ -1,6 +1,5 @@
 from .load_json import load_json
 
-
 """
 Usage
 create a file in the root of the project called `your_name.json`

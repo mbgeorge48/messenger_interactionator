@@ -16,10 +16,6 @@ def filter_reacted_messages_by_participant(messages, participant):
     for message in messages:
 
         if message.get("sender_name") == participant:
-
-            message.pop("is_geoblocked_for_viewer")
-            message.pop("timestamp_ms")
-
             if message.get("content"):
                 breakdown["messages"].append(message)
             else:
@@ -33,6 +29,8 @@ def get_all_reacted_messages(messages, min_reactions_length=0):
     all_reacted_messages = []
     for message in messages:
         if len(message.get("reactions", [])) > min_reactions_length:
+            message.pop("is_geoblocked_for_viewer")
+            message.pop("timestamp_ms")
             message["reactions_length"] = len(message["reactions"])
             all_reacted_messages.append(message)
     sorted_all_reacted_messages = sorted(

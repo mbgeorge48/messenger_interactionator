@@ -1,5 +1,6 @@
+#!/usr/bin/env python
+
 import argparse
-import collections
 import datetime
 import re
 
@@ -26,67 +27,49 @@ def get_nicknames(json_string, nicknames_set):
 
     nickname_details = {}
     for message in json_string:
-        try:  # Need to catch as I found that not all messages have content
-            if re.match(main_pattern, message["content"]) is not None:
-                nickname_details[message["timestamp_ms"]] = message["content"]
-                nicknames_set[message["sender_name"]] += 1
-        except:
-            pass
+        if re.match(main_pattern, message.get("content", "message")) is not None:
+            nickname_details[message["timestamp_ms"]] = message["content"]
+            nicknames_set[message["sender_name"]] += 1
 
-    nicknames_sorted = collections.defaultdict(list)
-    for item in list(nickname_details.items()):
-        if (
-            re.match(nickname_patterns.get("someone_set_your_nickname"), item[1])
-            is not None
-        ):
-            nicknames_sorted["someone_set_your_nickname"].append(item)
-        elif (
-            re.match(nickname_patterns.get("you_set_someones_nickname"), item[1])
-            is not None
-        ):
-            nicknames_sorted["you_set_someones_nickname"].append(item)
-        elif (
-            re.match(nickname_patterns.get("someone_set_their_own_nickname"), item[1])
-            is not None
-        ):
-            nicknames_sorted["someone_set_their_own_nickname"].append(item)
-        elif (
-            re.match(nickname_patterns.get("someone_set_someones_nickname"), item[1])
-            is not None
-        ):
-            nicknames_sorted["someone_set_someones_nickname"].append(item)
-        elif (
-            re.match(nickname_patterns.get("you_set_your_own_nickname"), item[1])
-            is not None
-        ):
-            nicknames_sorted["you_set_your_own_nickname"].append(item)
+    nicknames_sorted = {
+        "someone_set_your_nickname": [],
+        "you_set_someones_nickname": [],
+        "someone_set_their_own_nickname": [],
+        "someone_set_someones_nickname": [],
+        "you_set_your_own_nickname": [],
+    }
+
+    for key, pattern in zip(nicknames_sorted, nickname_patterns.keys()):
+        regex_pattern = re.compile(nickname_patterns.get(pattern))
+
+        for item in nickname_details.items():
+            if regex_pattern.match(item[1]):
+                nicknames_sorted[key].append(item)
 
     return nicknames_sorted, nicknames_set
 
 
 def sort_nicknames(all_nicknames, participants):
-    peoples_nicknames = collections.defaultdict(list)
+    peoples_nicknames = {participant: [] for participant in participants}
     nickname_regex = "^.*?set.*?nickname.*?to "
 
     for key in all_nicknames.keys():
         for item in all_nicknames[key]:
-            this_set = {
-                "nickname": (re.sub(nickname_regex, "", item[1]).rstrip(".")),
-                "timestamp": (
-                    datetime.datetime.fromtimestamp(item[0] / 1000).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+            nickname_entry = {
+                "nickname": re.sub(nickname_regex, "", item[1]).rstrip("."),
+                "timestamp": datetime.datetime.fromtimestamp(item[0] / 1000).strftime(
+                    "%Y-%m-%d %H:%M:%S"
                 ),
             }
             for participant in participants:
                 if participant in item[1]:
-                    peoples_nicknames[participant].append(this_set)
-            if "someone_set_your_nickname" == key:
-                peoples_nicknames[YOUR_NAME].append(this_set)
-            if "you_set_your_own_nickname" == key:
-                peoples_nicknames[YOUR_NAME].append(this_set)
+                    peoples_nicknames[participant].append(nickname_entry)
+
+            if key in ["someone_set_your_nickname", "you_set_your_own_nickname"]:
+                peoples_nicknames[YOUR_NAME].append(nickname_entry)
 
     for participant in participants:
+        print(peoples_nicknames[participant])
         peoples_nicknames[participant].sort(key=lambda x: x["timestamp"], reverse=True)
 
     return peoples_nicknames

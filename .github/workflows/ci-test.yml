@@ -13,5 +13,11 @@ jobs:
             - name: BE linting
               run: |
                   pip install black isort
+                  echo #########
+                  echo # isort #
+                  echo #########
                   isort --profile black --check --diff src
+                  echo #########
+                  echo # black #
+                  echo #########
                   black src --check

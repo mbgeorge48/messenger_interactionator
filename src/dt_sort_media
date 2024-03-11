@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+import datetime
+import os
+import sys
+
+from utils import initial_file_load, load_json, write_to_file
+
+PRINT_LOGS = False
+MEDIA_TYPE_CHOICES = ["photos", "videos", "files", "audio", "gifs"]
+# Options are "photos", "videos", "files", "audio", "gifs"
+
+
+def update_media(message, media_type, media_index, media_file, path):
+    _, file_extension = os.path.splitext(media_file)
+    media_timestamp = datetime.datetime.fromtimestamp(
+        message["timestamp_ms"] / 1000
+    ).strftime("%Y-%m-%d_%H%M%S")
+    media_sender = message["sender_name"].replace(" ", "_")
+
+    new_name = os.path.join(
+        os.path.dirname(message.get(media_type)[media_index]["uri"]),
+        f"{media_timestamp}-{media_sender}{file_extension}",
+    )
+    current_path = os.path.join(path, media_type, media_file)
+    new_path = os.path.join(path, media_type, os.path.basename(new_name))
+
+    try:
+        os.rename(current_path, new_path)
+        message.get(media_type)[media_index]["uri"] = new_name
+    except FileNotFoundError as fnf_e:
+        print(f"\nFailed to move {media_file} to {new_path}", fnf_e)
+    except Exception as e:
+        print("Something unexpected went wrong", e)
+
+    return message
+
+
+def sort_media(file, media_files, media_type, path, print_logs):
+    json_data = load_json(file)
+    messages = json_data.get("messages")
+
+    updated_messages = []
+    for message in messages:
+        if not message.get(media_type):
+            updated_messages.append(message)
+            continue
+
+        for media_index, media_object in enumerate(message.get(media_type)):
+            media_file = os.path.split(media_object.get("uri"))[1]
+            if media_file in media_files:
+                message = update_media(
+                    message, media_type, media_index, media_file, path
+                )
+                updated_messages.append(message)
+    json_data["messages"] = updated_messages
+    write_to_file(file, json_data)
+
+
+def process_folder(path, media_type, print_logs):
+    media_path = os.path.join(path, media_type)
+    if not os.path.exists(media_path):
+        # Can be very noisey
+        # print(f"{media_type} folder not found - {path}")
+        return None
+    else:
+        media_files = os.listdir(media_path)
+
+    files_to_update = initial_file_load(path)
+
+    for file in files_to_update:
+        sort_media(file, media_files, media_type, path, print_logs)
+
+
+def main(dirs_to_format):
+    for root, dirs, _ in os.walk(dirs_to_format, topdown=False):
+        for folder in dirs:
+            full_path = os.path.join(root, folder)
+            if os.path.exists(os.path.join(full_path, "message_1.json")):
+                for media_type in MEDIA_TYPE_CHOICES:
+                    process_folder(full_path, media_type, PRINT_LOGS)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if os.path.isdir(sys.argv[1]):
+            main(sys.argv[1])
+        else:
+            print("Missing path")
+    else:
+        print("Missing path")

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 
 from utils import (
@@ -9,7 +11,7 @@ from utils import (
 
 
 def get_all_media_sent_messages(messages):
-    all_media_sent_messages = []
+    media_messages = []
     for message in messages:
         if (
             message.get("photos")
@@ -18,37 +20,36 @@ def get_all_media_sent_messages(messages):
             or message.get("audio")
             or message.get("gifs")
         ):
-            all_media_sent_messages.append(message)
-    return all_media_sent_messages
+            media_messages.append(message)
+    return media_messages
 
 
 def count_media_sent_by_participants(all_media_sent_messages, media_sender):
     for message in all_media_sent_messages:
-        try:
-            media_sender[message["sender_name"]] += 1
-        except KeyError:
-            media_sender[message["sender_name"]] = 0
-            media_sender[message["sender_name"]] += 1
+        sender_name = message["sender_name"]
+        media_sender[message["sender_name"]] = media_sender.get(sender_name, 0) + 1
+
     media_sender = dict(
         sorted(media_sender.items(), key=lambda item: item[1], reverse=True)
     )
     return media_sender
 
 
-def get_media_sent_by_participant_count_breakdowns(all_media_sent_messages):
+def get_media_sent_by_participant_count_breakdowns(
+    all_media_sent_messages, participants
+):
     media_sent_breakdown = {}
-    for message in all_media_sent_messages:
-        try:
-            media_sent_breakdown[message["sender_name"]]
-        except KeyError:
-            media_sent_breakdown[message["sender_name"]] = {
-                "photos": 0,
-                "videos": 0,
-                "files": 0,
-                "audio": 0,
-                "gifs": 0,
-            }
 
+    for participant in participants:
+        media_sent_breakdown[participant] = {
+            "photos": 0,
+            "videos": 0,
+            "files": 0,
+            "audio": 0,
+            "gifs": 0,
+        }
+
+    for message in all_media_sent_messages:
         for media_type in ["photos", "videos", "files", "audio", "gifs"]:
             if message.get(media_type):
                 media_sent_breakdown[message["sender_name"]][media_type] += len(
@@ -71,11 +72,9 @@ def get_media_sent_by_type_count_breakdowns(all_media_sent_messages):
     for message in all_media_sent_messages:
         for media_type in ["photos", "videos", "files", "audio", "gifs"]:
             if message.get(media_type):
-                try:
-                    media_sent_breakdown[media_type] += len(message.get(media_type))
-                except KeyError:
-                    media_sent_breakdown[media_type] = 0
-                    media_sent_breakdown[media_type] += len(message.get(media_type))
+                media_sent_breakdown[media_type] = media_sent_breakdown.get(
+                    media_type, 0
+                ) + len(message.get(media_type))
 
     media_sent_breakdown = dict(
         sorted(media_sent_breakdown.items(), key=lambda item: item[1], reverse=True)
@@ -146,7 +145,9 @@ def main(
         )
     data[
         "media_sent_breakdowns_participant"
-    ] = get_media_sent_by_participant_count_breakdowns(all_media_sent_messages)
+    ] = get_media_sent_by_participant_count_breakdowns(
+        all_media_sent_messages, participants
+    )
     data["media_sent_breakdowns_media_type"] = get_media_sent_by_type_count_breakdowns(
         all_media_sent_messages
     )

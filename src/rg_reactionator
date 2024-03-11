@@ -11,6 +11,24 @@ from utils import (
 )
 
 
+def filter_reacted_messages_by_participant(messages, participant):
+    breakdown = {"messages": [], "media": []}
+    for message in messages:
+
+        if message.get("sender_name") == participant:
+
+            message.pop("is_geoblocked_for_viewer")
+            message.pop("timestamp_ms")
+
+            if message.get("content"):
+                breakdown["messages"].append(message)
+            else:
+                breakdown["media"].append(message)
+        if len(breakdown.get("messages")) >= 5 and len(breakdown.get("media")) >= 5:
+            break
+    return breakdown
+
+
 def get_all_reacted_messages(messages, min_reactions_length=0):
     all_reacted_messages = []
     for message in messages:
@@ -147,8 +165,9 @@ def main(
     date_range_start,
     date_range_end,
     emojis_key,
-    saveallreacts,
-    saveallemojis,
+    save_all_reacts,
+    save_all_emojis,
+    participant_breakdown,
 ):
     # Get messages and participants
     messages, participants = get_data_to_parse(
@@ -163,8 +182,13 @@ def main(
 
     # Save all reacted messages or trim and save top results
     reaction_data = {}
-    if saveallreacts:
+    if save_all_reacts:
         reaction_data["reacted_messages"] = all_reacted_messages
+    elif participant_breakdown:
+        for participant in participants:
+            reaction_data[participant] = filter_reacted_messages_by_participant(
+                all_reacted_messages, participant
+            )
     else:
         top_results = 5
         trimmed_reacted_messages = get_trimmed_reacted_messages(
@@ -191,7 +215,7 @@ def main(
     )
 
     # Save all emojis or get most common reactions
-    if saveallemojis:
+    if save_all_emojis:
         reaction_data["emoji_counter"] = find_most_common_reaction(all_reacted_messages)
 
     # Find each participant's biggest fan
@@ -235,6 +259,14 @@ if __name__ == "__main__":
         default=False,
         help="Save all the emojis messages in the json",
     )
+    parser.add_argument(
+        "-p",
+        "--participant",
+        type=bool,
+        default=False,
+        help="Get a summary of the top reactions for each participant",
+    )
+
     args = parser.parse_args()
 
     main(
@@ -244,4 +276,5 @@ if __name__ == "__main__":
         args.emojis,
         args.saveallreacts,
         args.saveallemojis,
+        args.participant,
     )

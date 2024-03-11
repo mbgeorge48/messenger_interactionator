@@ -10,13 +10,19 @@ import os
 from string import punctuation
 
 import enchant
+import nltk
 from emoji import emojize, is_emoji
+from nltk.corpus import stopwords
 
 from utils import encode_string, get_data_to_parse, initial_file_load, write_to_file
 
 d = enchant.Dict("en_GB")
+nltk.download("wordnet")
+nltk.download("stopwords")
+stop_words = set(stopwords.words("english"))
 
 invalid_words = []
+SAVE_INVALID_WORDS = False
 
 
 def verified_word(word):
@@ -39,11 +45,9 @@ def verified_word(word):
         if not d.check(word.strip(punctuation)):
             invalid_words.append(word)
             return None
-
-    cleaned_word = "".join(
-        e for e in encode_string(word, emojize=True) if e.isalnum()
-    ).lower()
-    return cleaned_word
+    cleaned_word = "".join(e for e in encode_string(word, emojize=True) if e.isalnum())
+    if cleaned_word not in stop_words:
+        return cleaned_word
 
 
 def emoji_or_noji(word, emojis_only):
@@ -104,7 +108,7 @@ def main(
     messages.reverse()
     for message in messages:
         try:
-            words = message.get("content", "").split(" ")
+            words = message.get("content", "").lower().split(" ")
             sender_name = message.get("sender_name", "")
             for word in words:
                 formatted_word = verified_word(word)
@@ -119,6 +123,8 @@ def main(
                             "count": 1,
                             "op": sender_name,
                         }
+                        # word_data[formatted_word]["score"] = score_word(word)
+
                         if capture_context:
                             word_data[formatted_word]["context"] = message.get(
                                 "content", ""
@@ -128,12 +134,13 @@ def main(
             continue
 
     sorted_word_data = dict(
-        sorted(word_data.items(), key=lambda item: item[1]["count"])
+        sorted(word_data.items(), key=lambda item: item[1]["score"], reverse=True)
     )
     sorted_sender_count = dict(sorted(sender_count.items(), key=lambda item: item[1]))
 
     sorted_word_data["sender_count"] = sorted_sender_count
-    sorted_word_data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
+    if SAVE_INVALID_WORDS:
+        sorted_word_data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
 
     write_to_file("unique_words.json", sorted_word_data)
 

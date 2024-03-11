@@ -1,12 +1,14 @@
 black==23.10.1
 click==8.1.7
 emoji==2.8.0
+emoji==2.8.0
 flake8==6.1.0
 mccabe==0.7.0
 mypy-extensions==1.0.0
+nltk==3.8.1
 packaging==23.2
 pathspec==0.11.2
 platformdirs==3.11.0
 pycodestyle==2.11.1
 pyflakes==3.1.0
-emoji==2.8.0
+syllapy==0.7.2

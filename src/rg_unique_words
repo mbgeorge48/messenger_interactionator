@@ -6,19 +6,15 @@
 
 import argparse
 import datetime
-from emoji import emojize, is_emoji
-from utils import (
-    encode_string,
-    get_data_to_parse,
-    initial_file_load,
-    write_to_file,
-)
-import nltk
-from nltk.corpus import stopwords
-from string import punctuation
-import enchant
 import os
+from string import punctuation
 
+import enchant
+import nltk
+from emoji import emojize, is_emoji
+from nltk.corpus import stopwords
+
+from utils import encode_string, get_data_to_parse, initial_file_load, write_to_file
 
 d = enchant.Dict("en_GB")
 nltk.download("wordnet")

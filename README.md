@@ -85,8 +85,6 @@ The last bit of data transformation you can do run is the `dt_sort_media.py`. Th
 python src/dt_sort_media.py $HOME/path/to/specific/group/chat/folder
 ```
 
-It's also not 100% tested at the time of writing...
-
 ## Result Generators
 
 These scripts take a few common params for them to be able to run, those are:

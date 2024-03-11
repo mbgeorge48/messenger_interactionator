@@ -1,0 +1,37 @@
+#!/bin/bash
+
+initial_dir=$(pwd)
+IGNORE_SPACE_CHECK=true
+
+[[ -z "$1" ]] && {
+    echo "Pass in a directory to scan, i.e. $HOME/Documents/folder"
+    exit 1
+}
+cd $1
+
+# check file space
+
+# If the total uncompressed space is less than 70% of the remaining disk space don't start unzipping
+# If checkspace returns good, continue?
+if [ $((DISK_SPACE * 70 / 100)) -gt $total_space ] || [ "$IGNORE_SPACE_CHECK" = true ]; then
+
+    # Ensure the folder is empty
+    rm -rf unzipped
+    mkdir -p unzipped
+    # not sure if that'll work
+    if [ $(command -v unzip) ]; then
+        echo "Starting to unzip"
+        for filename in $(find . -type f -name "*.zip"); do
+            FILE=${filename%.zip*}
+            echo "Unzipping $FILE"
+            unzip $filename -d unzipped/$FILE >>$initial_dir/data-transform.log
+        done
+    else
+        echo "Check you have the unzip command installed"
+        echo "sudo apt get unzip"
+    fi
+else
+    echo $DISK_SPACE
+    echo $total_space
+    echo "Not enough disk space"
+fi

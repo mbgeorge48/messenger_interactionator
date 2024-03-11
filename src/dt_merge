@@ -1,0 +1,23 @@
+#!/bin/bash
+
+initial_dir=$(pwd)
+
+[[ -z "$1" ]] && {
+    echo "Pass in a directory to scan, i.e. $HOME/Documents/folder"
+    exit 1
+}
+cd $1
+
+# check file space
+
+# If the total uncompressed space is less than 70% of the remaining disk space don't start unzipping
+# If checkspace returns good, continue?
+
+# Ensure the folder is empty
+rm -rf merged
+mkdir -p merged
+echo "Starting the merge"
+for folder in unzipped/*; do
+    echo "Copying $folder"
+    cp -v -R $folder/* merged >>$initial_dir/data-transform.log
+done

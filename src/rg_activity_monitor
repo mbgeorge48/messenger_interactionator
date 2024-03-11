@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 import argparse
+from collections import defaultdict
 from datetime import datetime
 
 from utils import get_data_to_parse, initial_file_load
@@ -8,37 +11,28 @@ def get_longest_message(messages):
     longest_message_length = 0
     longest_message = {}
     for message in messages:
-        if (
-            message.get("content")
-            and len(message.get("content")) > longest_message_length
-        ):
+        if len(message.get("content", "")) > longest_message_length:
             longest_message_length = len(message.get("content"))
             longest_message = message
     return longest_message
 
 
 def most_active(messages):
-    data = {}
+    data = defaultdict(int)
     for message in messages:
-        try:
-            data[message["sender_name"]] += 1
-        except KeyError:
-            data[message["sender_name"]] = 1
+        data[message["sender_name"]] += 1
     return dict(sorted(data.items(), key=lambda item: item[1], reverse=True))
 
 
 def get_yearly_message_count(messages):
-    data = {}
+    data = defaultdict(int)
     for message in messages:
         year = int(
             datetime.strptime(
                 message.get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
             ).strftime("%Y")
         )
-        try:
-            data[year] += 1
-        except KeyError:
-            data[year] = 1
+        data[year] += 1
     return data
 
 
@@ -64,19 +58,29 @@ def get_average_messages_a_day(messages):
     return average_messages
 
 
+def swap_number_to_day(day_number):
+    days_of_week = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+    return days_of_week[day_number % 7]
+
+
 def get_busiest_weekday(messages):
     # Monday is 0 and Sunday is 6
-    data = {}
+    data = defaultdict(int)
     for message in messages:
         day = int(
             datetime.strptime(
                 message.get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
             ).weekday()
         )
-        try:
-            data[day] += 1
-        except KeyError:
-            data[day] = 1
+        data[day] += 1
     return data
 
 
@@ -85,19 +89,24 @@ def main(data_to_parse, date_range_start, date_range_end, function):
 
     if function == "longest-message":
         longest_message = get_longest_message(messages)
-        print(longest_message, len(longest_message.get("content").split()))
+        print(
+            f"sender=> {longest_message.get('sender_name')}\nmessage=> {longest_message.get('content')}\nlength=> {len(longest_message.get('content').split())}"
+        )
     if function == "most-active":
         participant_message_count = most_active(messages)
-        print(participant_message_count)
+        for sender, message_count in participant_message_count.items():
+            print(f"{sender}=> {message_count}")
     if function == "yearly-message-count":
         yearly_message_count = get_yearly_message_count(messages)
-        print(yearly_message_count)
+        for year, message_count in yearly_message_count.items():
+            print(f"{year}=> {message_count}")
     if function == "average-messages":
         average_messages = get_average_messages_a_day(messages)
-        print(average_messages)
+        print(f"average messages a day=> {average_messages}")
     if function == "busiest-day":
         busiest_day = get_busiest_weekday(messages)
-        print(busiest_day)
+        for day_number, message_count in busiest_day.items():
+            print(f"{swap_number_to_day(day_number)}=> {message_count}")
 
 
 if __name__ == "__main__":

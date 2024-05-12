@@ -81,7 +81,9 @@ def get_data_to_parse(
         )
     participants = messages = []
     for entry in data:
-        participants = participants + utils.get_participants(entry["participants"])
+        participants = participants + utils.get_participants(
+            json_string=entry["participants"]
+        )
         messages = messages + date_filter(
             messages=entry["messages"], date_range=date_range
         )

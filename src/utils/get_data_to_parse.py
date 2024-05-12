@@ -8,7 +8,7 @@ def convert_string_to_date(date_string):
     return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
 
-def date_filter(messages, date_range):
+def date_filter(*, messages, date_range):
     latest_message = convert_string_to_date(messages[0]["timestamp_converted"])
     earliest_message = convert_string_to_date(messages[-1]["timestamp_converted"])
     date_range_start = convert_string_to_date(date_range["start"])
@@ -29,7 +29,7 @@ def date_filter(messages, date_range):
     return filtered_messages
 
 
-def convert_date(date_string, end_of_month=False):
+def convert_date(*, date_string, end_of_month=False):
     try:
         date = datetime.strptime(date_string, "%Y-%m")
     except ValueError:
@@ -45,22 +45,27 @@ def convert_date(date_string, end_of_month=False):
     return date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def get_data_to_parse(data_to_parse, date_range_start, date_range_end):
+def get_data_to_parse(
+    data_to_parse, date_range_start, date_range_end, flag_message_chat_name=False
+):
     date_range = {}
     date_range["start"] = convert_date(
-        date_range_start if date_range_start else "2000-01"
+        date_string=date_range_start if date_range_start else "2000-01"
     )
     date_range["end"] = convert_date(
-        date_range_end if date_range_end else datetime.today().strftime("%Y-%m"),
-        True,
+        date_string=(
+            date_range_end if date_range_end else datetime.today().strftime("%Y-%m")
+        ),
+        end_of_month=True,
     )
-    print(date_range)
     data = []
     for file in data_to_parse:
-        data.append(utils.read_message_file(file))
+        data.append(utils.read_message_file(file, flag_message_chat_name))
     participants = messages = []
     for entry in data:
         participants = participants + utils.get_participants(entry["participants"])
-        messages = messages + date_filter(entry["messages"], date_range)
+        messages = messages + date_filter(
+            messages=entry["messages"], date_range=date_range
+        )
     participants = list(dict.fromkeys(participants))
     return messages, participants

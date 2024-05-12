@@ -89,8 +89,10 @@ def main(*, data_to_parse, date_range_start, date_range_end, function):
 
     if function == "longest-message":
         longest_message = get_longest_message(messages)
+        sender = longest_message.get("sender_name")
+        content = longest_message.get("content")
         print(
-            f"sender=> {longest_message.get('sender_name')}\nmessage=> {longest_message.get('content')}\nlength=> {len(longest_message.get('content').split())}"
+            f"sender=> {sender}\nmessage=> {content}\nlength=> {len(content.split())}"
         )
     if function == "most-active":
         participant_message_count = most_active(messages)

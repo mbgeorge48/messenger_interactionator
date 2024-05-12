@@ -1,7 +1,7 @@
 import emoji
 
 
-def encode_string(string, emojize=False):
+def encode_string(*, string, emojize=False):
     new_string = string
     for ecoding in ["latin1", "utf8", "utf-16", "iso-8859-1"]:
         try:

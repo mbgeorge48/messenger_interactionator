@@ -2,7 +2,9 @@ import json
 
 
 def read_message_file(file_to_parse, flag_message_chat_name=False):
-    print(f"reading {file_to_parse}, {flag_message_chat_name}")
+    print(
+        f"reading {file_to_parse}, {'flagging message data' if flag_message_chat_name else None}"
+    )
     with open(file_to_parse) as json_data:
         json_string = json.load(json_data)
     payload = {

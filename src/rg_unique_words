@@ -123,7 +123,6 @@ def main(
                             "count": 1,
                             "op": sender_name,
                         }
-                        # word_data[formatted_word]["score"] = score_word(word)
 
                         if capture_context:
                             word_data[formatted_word]["context"] = message.get(
@@ -134,7 +133,7 @@ def main(
             continue
 
     sorted_word_data = dict(
-        sorted(word_data.items(), key=lambda item: item[1]["score"], reverse=True)
+        sorted(word_data.items(), key=lambda item: item[1]["count"], reverse=True)
     )
     sorted_sender_count = dict(sorted(sender_count.items(), key=lambda item: item[1]))
 

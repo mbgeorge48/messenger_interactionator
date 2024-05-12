@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+
+import argparse
+
+from utils import (
+    get_data_to_parse,
+    initial_file_load,
+    initialise_counter_dict,
+    load_json,
+    write_to_file,
+)
+
+
+def multichat_sandwich():
+    return ""
+
+
+def individual_sandwich():
+    return ""
+
+
+def main(data_to_parse, date_range_start, date_range_end, multichat):
+    messages, participants = get_data_to_parse(
+        data_to_parse, date_range_start, date_range_end, True
+    )
+
+    individual_sandwich(messages, participants)
+
+    if multichat:
+        for participant in participants:
+            multichat_sandwich(participant, messages)
+
+    # write_to_file("potty_patrol_results.json", data)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", type=str, required=True)
+    parser.add_argument("--multichat", type=bool, default=False)
+    parser.add_argument(
+        "--drstart",
+        type=str,
+        help="The date range start for getting messages, format needs to be (YYYY-MM)",
+    )
+    parser.add_argument(
+        "--drend",
+        type=str,
+        help="The date range end for getting messages, format needs to be (YYYY-MM)",
+    )
+
+    args = parser.parse_args()
+
+    main(
+        initial_file_load(args.file, args.multichat),
+        args.drstart,
+        args.drend,
+        args.multichat,
+    )

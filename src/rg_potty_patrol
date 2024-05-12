@@ -12,7 +12,7 @@ from utils import (
 )
 
 
-def get_all_naughty_messages(messages, potty_words, potty_mouth_counter):
+def get_all_naughty_messages(*, messages, potty_words, potty_mouth_counter):
     participant_specific_count = {}
 
     for message in messages:
@@ -51,7 +51,7 @@ def get_all_naughty_messages(messages, potty_words, potty_mouth_counter):
     return participant_specific_count, potty_mouth_counter
 
 
-def main(data_to_parse, date_range_start, date_range_end, potty_file):
+def main(*, data_to_parse, date_range_start, date_range_end, potty_file):
     # Get messages and participants
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
@@ -65,7 +65,9 @@ def main(data_to_parse, date_range_start, date_range_end, potty_file):
 
     # Get naughty messages counts
     participant_specific_count, potty_mouth_counter = get_all_naughty_messages(
-        messages, potty_words, potty_mouth_counter
+        messages=messages,
+        potty_words=potty_words,
+        potty_mouth_counter=potty_mouth_counter,
     )
 
     # Prepare data for writing to file
@@ -75,7 +77,7 @@ def main(data_to_parse, date_range_start, date_range_end, potty_file):
     }
 
     # Write results to file
-    write_to_file("potty_patrol_results.json", data)
+    write_to_file(file_name="potty_patrol_results.json", data=data)
 
 
 if __name__ == "__main__":
@@ -102,8 +104,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(
-        initial_file_load(args.file, args.multichat),
-        args.drstart,
-        args.drend,
-        args.pottyfile,
+        data_to_parse=initial_file_load(args.file, args.multichat),
+        date_range_start=args.drstart,
+        date_range_end=args.drend,
+        potty_file=args.pottyfile,
     )

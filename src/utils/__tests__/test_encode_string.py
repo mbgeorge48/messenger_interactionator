@@ -1,4 +1,5 @@
 import pytest
+
 from utils.encode_string import encode_string
 
 

@@ -1,5 +1,6 @@
-from utils.get_data_to_parse import date_filter, convert_date
 from datetime import datetime
+
+from utils.get_data_to_parse import convert_date, date_filter
 
 test_messages = [
     {

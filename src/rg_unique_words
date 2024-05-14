@@ -78,6 +78,7 @@ def list_every_word(all_messages, emojis_only):
 
 
 def main(
+    *,
     data_to_parse,
     date_range_start,
     date_range_end,
@@ -141,7 +142,7 @@ def main(
     if SAVE_INVALID_WORDS:
         sorted_word_data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
 
-    write_to_file("unique_words.json", sorted_word_data)
+    write_to_file(file_name="unique_words.json", data=sorted_word_data)
 
 
 if __name__ == "__main__":
@@ -174,10 +175,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if os.path.exists(args.file):
         main(
-            initial_file_load(args.file, args.multichat),
-            args.drstart,
-            args.drend,
-            args.emojis,
-            args.context,
-            args.compareyear,
+            data_to_parse=initial_file_load(args.file, args.multichat),
+            date_range_start=args.drstart,
+            date_range_end=args.drend,
+            emojis_only=args.emojis,
+            capture_context=args.context,
+            compare_year=args.compareyear,
         )

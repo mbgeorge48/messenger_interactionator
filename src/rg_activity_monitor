@@ -84,13 +84,15 @@ def get_busiest_weekday(messages):
     return data
 
 
-def main(data_to_parse, date_range_start, date_range_end, function):
+def main(*, data_to_parse, date_range_start, date_range_end, function):
     messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
 
     if function == "longest-message":
         longest_message = get_longest_message(messages)
+        sender = longest_message.get("sender_name")
+        content = longest_message.get("content")
         print(
-            f"sender=> {longest_message.get('sender_name')}\nmessage=> {longest_message.get('content')}\nlength=> {len(longest_message.get('content').split())}"
+            f"sender=> {sender}\nmessage=> {content}\nlength=> {len(content.split())}"
         )
     if function == "most-active":
         participant_message_count = most_active(messages)
@@ -141,8 +143,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(
-        initial_file_load(args.file, args.multichat),
-        args.drstart,
-        args.drend,
-        args.function,
+        data_to_parse=initial_file_load(args.file, args.multichat),
+        date_range_start=args.drstart,
+        date_range_end=args.drend,
+        function=args.function,
     )

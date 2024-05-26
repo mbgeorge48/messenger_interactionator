@@ -2,7 +2,6 @@ import datetime
 import json
 import operator
 import random
-
 import emoji
 import lorem
 import requests

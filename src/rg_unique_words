@@ -14,8 +14,7 @@ import nltk
 from emoji import emojize, is_emoji
 from nltk.corpus import stopwords
 
-from utils import (encode_string, get_data_to_parse, initial_file_load,
-                   write_to_file)
+from utils import encode_string, get_data_to_parse, initial_file_load, write_to_file
 
 d = enchant.Dict("en_GB")
 nltk.download("wordnet")

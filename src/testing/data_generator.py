@@ -1,9 +1,10 @@
 import datetime
-import emoji
 import json
-import lorem
 import operator
 import random
+
+import emoji
+import lorem
 import requests
 
 

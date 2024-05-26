@@ -95,9 +95,9 @@ def generate_message_data(*, realish, participants):
     if message_type == "text":
         message["content"] = generate_message_content(realish=realish)
     else:
-        message[
-            random.choice(["photos", "videos", "files", "audio_files", "gifs"])
-        ] = generate_media(unix_timestamp=int(timestamp.timestamp()))
+        message[random.choice(["photos", "videos", "files", "audio_files", "gifs"])] = (
+            generate_media(unix_timestamp=int(timestamp.timestamp()))
+        )
 
     if has_reactions:
         message["reactions"] = []

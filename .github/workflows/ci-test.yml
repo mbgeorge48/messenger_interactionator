@@ -20,4 +20,4 @@ jobs:
                   echo #########
                   echo # black #
                   echo #########
-                  black src --check
+                  black src --check --diff

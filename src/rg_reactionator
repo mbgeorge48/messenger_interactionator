@@ -71,12 +71,36 @@ def find_most_common_reaction(all_reacted_messages):
 
     for message in all_reacted_messages:
         for reaction in message.get("reactions", []):
+
             emoji = reaction["reaction"]
-            emoji_counter[emoji] = emoji_counter.get(emoji, 0) + 1
+            participant = reaction["actor"]
+            current_emoji = emoji_counter.get(emoji, {})
+
+            emoji_counter[emoji] = {
+                "count": current_emoji.get("count", 0) + 1,
+                "participants": {
+                    **current_emoji.get("participants", {}),
+                    participant: current_emoji.get("participants", {}).get(
+                        participant, 0
+                    )
+                    + 1,
+                },
+            }
+
+    for emoji in emoji_counter:
+        sorted_participants = dict(
+            sorted(
+                emoji_counter[emoji]["participants"].items(),
+                key=lambda item: item[1],
+                reverse=True,
+            )
+        )
+        emoji_counter[emoji]["participants"] = sorted_participants
 
     sorted_emoji_counter = dict(
-        sorted(emoji_counter.items(), key=lambda item: item[1], reverse=True)
+        sorted(emoji_counter.items(), key=lambda item: item[1]["count"], reverse=True)
     )
+
     return sorted_emoji_counter
 
 

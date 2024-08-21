@@ -9,15 +9,31 @@ from utils import (
     initialise_counter_dict,
     load_json,
     write_to_file,
+    initialise_participants_dict,
 )
+
+
+def sort_sandwich(participants_dict):
+    temp_list = ["" * len(participants_dict.keys())]
+    # get the first one and put it in index 0
+    # get the 2nd one and put it in index last
+    # work ya way in
 
 
 def multichat_sandwich():
     return ""
 
 
-def individual_sandwich():
-    return ""
+def individual_sandwich(*, messages, participants):
+    participants_dict = initialise_participants_dict(
+        participants=participants, initialiser=0
+    )
+    for message in messages:
+        participants_dict[message.get("sender_name")] += len(
+            message.get("content", "").split(" ")
+        )
+
+    return dict(sorted(participants_dict.items(), key=lambda item: item[1]))
 
 
 def main(data_to_parse, date_range_start, date_range_end, multichat):
@@ -25,13 +41,13 @@ def main(data_to_parse, date_range_start, date_range_end, multichat):
         data_to_parse, date_range_start, date_range_end, True
     )
 
-    individual_sandwich(messages, participants)
-
     if multichat:
         for participant in participants:
             multichat_sandwich(participant, messages)
+    else:
+        sandwich = individual_sandwich(messages=messages, participants=participants)
 
-    # write_to_file("potty_patrol_results.json", data)
+    write_to_file(file_name="sandwich.json", data=sandwich)
 
 
 if __name__ == "__main__":

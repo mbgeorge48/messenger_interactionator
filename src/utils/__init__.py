@@ -1,6 +1,6 @@
 from utils.encode_string import encode_string
 from utils.get_data_to_parse import get_data_to_parse
-from utils.get_participants import get_participants
+from utils.get_participants import get_participants, initialise_participants_dict
 from utils.get_your_name import get_your_name
 from utils.initial_file_load import initial_file_load
 from utils.initialise_counter_dict import initialise_counter_dict

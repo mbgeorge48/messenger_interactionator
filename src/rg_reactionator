@@ -182,6 +182,46 @@ def get_trimmed_reacted_messages(all_reacted_messages, top_results, participants
     return trimmed_reacted_messages
 
 
+def get_average_message_reactions(all_messages):
+    message_ratio_dict = {}
+
+    for message in all_messages:
+        participant = message["sender_name"]
+        message_ratio_dict = {
+            **message_ratio_dict,
+            participant: {
+                **message_ratio_dict.get(participant, {}),
+                "message": message_ratio_dict.get(participant, {}).get("message", 0)
+                + 1,
+            },
+        }
+        if message.get("reactions"):
+            message_ratio_dict = {
+                **message_ratio_dict,
+                participant: {
+                    **message_ratio_dict.get(participant, {}),
+                    "reacted": message_ratio_dict.get(participant, {}).get("reacted", 0)
+                    + 1,
+                },
+            }
+
+    for participant in message_ratio_dict:
+        message_ratio_dict[participant]["percentage"] = (
+            message_ratio_dict[participant]["reacted"]
+            / message_ratio_dict[participant]["message"]
+        ) * 100
+
+    sorted_message_ratio_dict = dict(
+        sorted(
+            message_ratio_dict.items(),
+            key=lambda item: item[1]["percentage"],
+            reverse=True,
+        )
+    )
+
+    return sorted_message_ratio_dict
+
+
 def main(
     *,
     data_to_parse,
@@ -191,6 +231,7 @@ def main(
     save_all_reacts,
     save_all_emojis,
     participant_breakdown,
+    average_reacts,
 ):
     # Get messages and participants
     messages, participants = get_data_to_parse(
@@ -241,6 +282,10 @@ def main(
     if save_all_emojis:
         reaction_data["emoji_counter"] = find_most_common_reaction(all_reacted_messages)
 
+    # Save all emojis or get most common reactions
+    if average_reacts:
+        reaction_data["average_reacts"] = get_average_message_reactions(messages)
+
     # Find each participant's biggest fan
     reaction_data["fan_zone"] = find_each_participants_biggest_fan(all_reacted_messages)
 
@@ -289,6 +334,12 @@ if __name__ == "__main__":
         default=False,
         help="Get a summary of the top reactions for each participant",
     )
+    parser.add_argument(
+        "--averagereacts",
+        type=bool,
+        default=False,
+        help="How many reacts does a participant get on average",
+    )
 
     args = parser.parse_args()
 
@@ -300,4 +351,5 @@ if __name__ == "__main__":
         save_all_reacts=args.saveallreacts,
         save_all_emojis=args.saveallemojis,
         participant_breakdown=args.participant,
+        average_reacts=args.averagereacts,
     )

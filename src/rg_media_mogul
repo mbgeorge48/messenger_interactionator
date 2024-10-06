@@ -42,7 +42,6 @@ def get_media_duration(*, media_type, message):
                 case "audio":
                     media_file = AudioFileClip(file_path)
                     media_duration = media_file.duration
-
     return media_duration
 
 
@@ -78,11 +77,7 @@ def get_media_sent_by_participant_count_breakdowns(
 
     for participant in participants:
         media_sent_breakdown[participant] = {
-            "photos": 0,
-            "videos": 0,
-            "files": 0,
-            "audio": 0,
-            "gifs": 0,
+            media_type: 0 for media_type in MEDIA_TYPES
         }
 
     for message in all_media_sent_messages:
@@ -106,11 +101,10 @@ def get_media_sent_by_participant_count_breakdowns(
 def get_time_length_of_media_types(all_media_sent_messages, participants):
     media_sent_breakdown = {}
 
+    media = ["videos", "audio"]
+
     for participant in participants:
-        media_sent_breakdown[participant] = {
-            "videos": "00:00:00",
-            "audio": "00:00:00",
-        }
+        media_sent_breakdown[participant] = {m: "00:00:00" for m in media}
 
     for message in all_media_sent_messages:
         for media_type in ["videos", "audio"]:
@@ -119,7 +113,6 @@ def get_time_length_of_media_types(all_media_sent_messages, participants):
                 media_duration = get_media_duration(
                     media_type=media_type, message=message
                 )
-
                 total_duration = media_sent_breakdown[message["sender_name"]][
                     media_type
                 ]
@@ -130,7 +123,70 @@ def get_time_length_of_media_types(all_media_sent_messages, participants):
                     media_type
                 ] = updated_duration
 
+    # Remove empty values, could probably reuse this code...
+    for participant_key, media_keys in media_sent_breakdown.items():
+        for media_type in list(media_keys.keys()):
+            item = media_keys[media_type]
+
+            if item != "00:00:00":
+                media_sent_breakdown[participant_key][media_type] = item
+            else:
+                del media_sent_breakdown[participant_key][media_type]
+
     return media_sent_breakdown
+
+
+def get_file_size_of_media(all_media_sent_messages, participants):
+    media_disk_space = {}
+    for participant in participants:
+        media_disk_space[participant] = {
+            media_type: {"b": 0} for media_type in MEDIA_TYPES
+        }
+
+    for message in all_media_sent_messages:
+        for media_type in MEDIA_TYPES:
+            if message.get(media_type):
+                for file in message.get(media_type):
+                    file_path = (
+                        os.path.dirname(__file__).replace("src", "") + file["uri"]
+                    )
+                    file_size = (
+                        os.stat(file_path).st_size if os.path.isfile(file_path) else 0
+                    )
+
+                    media_disk_space[message["sender_name"]][media_type][
+                        "b"
+                    ] += file_size
+    # Remove empty values, could probably reuse this code...
+    for participant_key, media_keys in media_disk_space.items():
+        for media_type in list(media_keys.keys()):
+            items = {k: v for k, v in media_keys[media_type].items() if v != 0}
+
+            if items:
+                media_disk_space[participant_key][media_type] = items
+            else:
+                del media_disk_space[participant_key][media_type]
+
+    for participant_key in media_disk_space.keys():
+        running_total = 0
+        for media_key, media_value in media_disk_space[participant_key].items():
+            if media_value["b"] > 0:
+                media_disk_space[participant_key][media_key]["mb"] = round(
+                    media_value["b"] / (1024 * 1024), 2
+                )
+                media_disk_space[participant_key][media_key]["gb"] = round(
+                    media_value["b"] / (1024 * 1024 * 1024), 2
+                )
+                running_total += media_value["b"]
+
+        if running_total > 0:
+            media_disk_space[participant_key]["totals"] = {
+                "b": running_total,
+                "mb": round(running_total / (1024 * 1024), 2),
+                "gb": round(running_total / (1024 * 1024 * 1024), 2),
+            }
+
+    return media_disk_space
 
 
 def get_media_sent_by_type_count_breakdowns(all_media_sent_messages):
@@ -187,6 +243,7 @@ def main(
     specific_participant,
     specific_mediatype,
     mediatype_timelength,
+    mediatype_filesize,
 ):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
@@ -218,6 +275,10 @@ def main(
 
     if mediatype_timelength:
         data["media_type_time_length"] = get_time_length_of_media_types(
+            all_media_sent_messages, participants
+        )
+    if mediatype_filesize:
+        data["media_type_file_size"] = get_file_size_of_media(
             all_media_sent_messages, participants
         )
 
@@ -257,6 +318,11 @@ if __name__ == "__main__":
         type=bool,
         help="Use with media type to get the number of minutes of infomation",
     )
+    parser.add_argument(
+        "--filesize",
+        type=bool,
+        help="Get the total disk space taken up by a participants media",
+    )
     args = parser.parse_args()
 
     main(
@@ -266,4 +332,5 @@ if __name__ == "__main__":
         specific_participant=args.participant,
         specific_mediatype=args.mediatype,
         mediatype_timelength=args.timelength,
+        mediatype_filesize=args.filesize,
     )

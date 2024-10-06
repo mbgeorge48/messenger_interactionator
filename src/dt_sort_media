@@ -27,7 +27,7 @@ def update_media(message, media_type, media_index, media_file, path):
 
     try:
         os.rename(current_path, new_path)
-        message.get(media_type)[media_index]["uri"] = new_name
+        message[media_type][media_index]["uri"] = new_path
     except FileNotFoundError as fnf_e:
         print(f"\nFailed to move {media_file} to {new_path}", fnf_e)
     except Exception as e:
@@ -54,7 +54,7 @@ def sort_media(file, media_files, media_type, path, print_logs):
                 )
                 updated_messages.append(message)
     json_data["messages"] = updated_messages
-    write_to_file(file, json_data)
+    write_to_file(file_name=file, data=json_data)
 
 
 def process_folder(path, media_type, print_logs):

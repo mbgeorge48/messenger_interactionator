@@ -23,6 +23,7 @@ stop_words = set(stopwords.words("english"))
 
 invalid_words = []
 SAVE_INVALID_WORDS = False
+REFERRAL_LINKS = ["share.octopus.energy", "trading212.com/invite", "join.monzo.com"]
 
 
 def verified_word(word):
@@ -45,7 +46,9 @@ def verified_word(word):
         if not d.check(word.strip(punctuation)):
             invalid_words.append(word)
             return None
-    cleaned_word = "".join(e for e in encode_string(word, emojize=True) if e.isalnum())
+    cleaned_word = "".join(
+        e for e in encode_string(string=word, emojize=True) if e.isalnum()
+    )
     if cleaned_word not in stop_words:
         return cleaned_word
 
@@ -130,6 +133,7 @@ def main(
                                 "content", ""
                             )
                         sender_count[sender_name] = sender_count.get(sender_name, 0) + 1
+
         except KeyError:
             continue
 
@@ -141,6 +145,13 @@ def main(
     sorted_word_data["sender_count"] = sorted_sender_count
     if SAVE_INVALID_WORDS:
         sorted_word_data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
+    for message in messages:
+        if any(link in message.get("content", "") for link in REFERRAL_LINKS):
+            sender_name = message.get("sender_name")
+            if not sorted_word_data.get("referer_count"):
+                sorted_word_data["referer_count"] = {}
+            sender_count = sorted_word_data["referer_count"].get(sender_name, 0)
+            sorted_word_data["referer_count"][sender_name] = sender_count + 1
 
     write_to_file(file_name="unique_words.json", data=sorted_word_data)
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
+from datetime import timedelta
+import cv2
+import os.path
+
+from moviepy.editor import AudioFileClip
+
 
 from utils import (
     get_data_to_parse,
@@ -8,6 +14,36 @@ from utils import (
     initialise_counter_dict,
     write_to_file,
 )
+
+MEDIA_TYPES = ["photos", "videos", "files", "audio", "gifs"]
+
+
+def time_to_seconds(time):
+    """Converts a time string formatted like H:M:S to seconds."""
+    h, m, s = map(int, time.split(":"))
+    return h * 3600 + m * 60 + s
+
+
+def update_time_value(current_duration, new_duration):
+    total_duration = current_duration + new_duration
+    return str(timedelta(seconds=total_duration)).split(".")[0]
+
+
+def get_media_duration(*, media_type, message):
+    for file in message.get(media_type):
+        file_path = os.path.dirname(__file__).replace("src", "") + file["uri"]
+        if os.path.isfile(file_path):
+            match media_type:
+                case "videos":
+                    media_file = cv2.VideoCapture(file_path)
+                    fps = media_file.get(cv2.CAP_PROP_FPS)
+                    frame_count = int(media_file.get(cv2.CAP_PROP_FRAME_COUNT))
+                    media_duration = frame_count / fps
+                case "audio":
+                    media_file = AudioFileClip(file_path)
+                    media_duration = media_file.duration
+
+    return media_duration
 
 
 def get_all_media_sent_messages(messages):
@@ -50,7 +86,7 @@ def get_media_sent_by_participant_count_breakdowns(
         }
 
     for message in all_media_sent_messages:
-        for media_type in ["photos", "videos", "files", "audio", "gifs"]:
+        for media_type in MEDIA_TYPES:
             if message.get(media_type):
                 media_sent_breakdown[message["sender_name"]][media_type] += len(
                     message.get(media_type)
@@ -67,10 +103,40 @@ def get_media_sent_by_participant_count_breakdowns(
     return media_sent_breakdown
 
 
+def get_time_length_of_media_types(all_media_sent_messages, participants):
+    media_sent_breakdown = {}
+
+    for participant in participants:
+        media_sent_breakdown[participant] = {
+            "videos": "00:00:00",
+            "audio": "00:00:00",
+        }
+
+    for message in all_media_sent_messages:
+        for media_type in ["videos", "audio"]:
+            if message.get(media_type):
+
+                media_duration = get_media_duration(
+                    media_type=media_type, message=message
+                )
+
+                total_duration = media_sent_breakdown[message["sender_name"]][
+                    media_type
+                ]
+                updated_duration = update_time_value(
+                    time_to_seconds(total_duration), media_duration
+                )
+                media_sent_breakdown[message["sender_name"]][
+                    media_type
+                ] = updated_duration
+
+    return media_sent_breakdown
+
+
 def get_media_sent_by_type_count_breakdowns(all_media_sent_messages):
     media_sent_breakdown = {}
     for message in all_media_sent_messages:
-        for media_type in ["photos", "videos", "files", "audio", "gifs"]:
+        for media_type in MEDIA_TYPES:
             if message.get(media_type):
                 media_sent_breakdown[media_type] = media_sent_breakdown.get(
                     media_type, 0
@@ -98,11 +164,7 @@ def get_media_detail_sent_by_specific_participant(
         }
 
     for message in all_media_sent_messages:
-        for media_type in (
-            [specific_mediatype]
-            if specific_mediatype
-            else ["photos", "videos", "files", "audio", "gifs"]
-        ):
+        for media_type in [specific_mediatype] if specific_mediatype else MEDIA_TYPES:
             if message.get("sender_name") == specific_participant and message.get(
                 media_type
             ):
@@ -124,6 +186,7 @@ def main(
     date_range_end,
     specific_participant,
     specific_mediatype,
+    mediatype_timelength,
 ):
     messages, participants = get_data_to_parse(
         data_to_parse, date_range_start, date_range_end
@@ -152,6 +215,11 @@ def main(
     data["media_sent_breakdowns_media_type"] = get_media_sent_by_type_count_breakdowns(
         all_media_sent_messages
     )
+
+    if mediatype_timelength:
+        data["media_type_time_length"] = get_time_length_of_media_types(
+            all_media_sent_messages, participants
+        )
 
     write_to_file(
         file_name="media_mogul_results.json",
@@ -182,7 +250,12 @@ if __name__ == "__main__":
         "--mediatype",
         type=str,
         help="Get a specific media type",
-        choices=["photos", "videos", "files", "audio", "gifs"],
+        choices=MEDIA_TYPES,
+    )
+    parser.add_argument(
+        "--timelength",
+        type=bool,
+        help="Use with media type to get the number of minutes of infomation",
     )
     args = parser.parse_args()
 
@@ -192,4 +265,5 @@ if __name__ == "__main__":
         date_range_end=args.drend,
         specific_participant=args.participant,
         specific_mediatype=args.mediatype,
+        mediatype_timelength=args.timelength,
     )

@@ -145,13 +145,29 @@ def main(
     sorted_word_data["sender_count"] = sorted_sender_count
     if SAVE_INVALID_WORDS:
         sorted_word_data["invalid_words"] = sorted(list(dict.fromkeys(invalid_words)))
+
+    longest_message = {"content": ""}
     for message in messages:
+        # if sender_name == message.get("sender_name"):
+        #     print(message.get("content", message), message.get("sender_name"))
+        #     sender_chain += 1
+        #     sorted_word_data["longest_chain_of_messages"] = {sender_name: sender_chain}
+        # else:
+        #     sender_chain = 0
+        sender_name = message.get("sender_name")
+
         if any(link in message.get("content", "") for link in REFERRAL_LINKS):
-            sender_name = message.get("sender_name")
             if not sorted_word_data.get("referer_count"):
                 sorted_word_data["referer_count"] = {}
             sender_count = sorted_word_data["referer_count"].get(sender_name, 0)
             sorted_word_data["referer_count"][sender_name] = sender_count + 1
+
+        if len(message.get("content", "").split(" ")) > len(
+            longest_message.get("content").split(" ")
+        ):
+            longest_message = message
+            longest_message["word_count"] = len(message.get("content").split(" "))
+            sorted_word_data["longest_message"] = longest_message
 
     write_to_file(file_name="unique_words.json", data=sorted_word_data)
 

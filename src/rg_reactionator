@@ -22,6 +22,7 @@ def filter_reacted_messages_by_participant(messages, participant):
                 breakdown["media"].append(message)
         if len(breakdown.get("messages")) >= 5 and len(breakdown.get("media")) >= 5:
             break
+
     return breakdown
 
 
@@ -174,9 +175,20 @@ def who_didnt_react(reacted_message, participants):
     return reactors
 
 
-def get_trimmed_reacted_messages(all_reacted_messages, top_results, participants):
+def get_trimmed_reacted_messages(
+    all_reacted_messages, top_x_results, participants, message_or_media="message"
+):
     trimmed_reacted_messages = []
-    for message in all_reacted_messages[:top_results]:
+    if message_or_media == "message":
+
+        subset_of_reacted_messages = [
+            message for message in all_reacted_messages if message.get("content")
+        ]
+    else:
+        subset_of_reacted_messages = [
+            message for message in all_reacted_messages if not message.get("content")
+        ]
+    for message in subset_of_reacted_messages[:top_x_results]:
         message["who_didnt_react"] = who_didnt_react(message, participants)
         trimmed_reacted_messages.append(message)
     return trimmed_reacted_messages
@@ -256,9 +268,14 @@ def main(
     else:
         top_results = 5
         trimmed_reacted_messages = get_trimmed_reacted_messages(
-            all_reacted_messages, top_results, participants
+            all_reacted_messages, top_results, participants, message_or_media="message"
         )
         reaction_data[f"top_{top_results}_reacted_messages"] = trimmed_reacted_messages
+        top_results = 5
+        trimmed_reacted_media = get_trimmed_reacted_messages(
+            all_reacted_messages, top_results, participants, message_or_media="media"
+        )
+        reaction_data[f"top_{top_results}_reacted_media"] = trimmed_reacted_media
 
     # Find most and least reactive participant
     reaction_data["times_reacted"] = find_most_and_least_reactive_participant(

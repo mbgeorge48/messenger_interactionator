@@ -30,6 +30,7 @@ def update_time_value(current_duration, new_duration):
 
 
 def get_media_duration(*, media_type, message):
+    medias_duration = 0
     for file in message.get(media_type):
         file_path = os.path.dirname(__file__).replace("src", "") + file["uri"]
         if os.path.isfile(file_path):
@@ -38,11 +39,12 @@ def get_media_duration(*, media_type, message):
                     media_file = cv2.VideoCapture(file_path)
                     fps = media_file.get(cv2.CAP_PROP_FPS)
                     frame_count = int(media_file.get(cv2.CAP_PROP_FRAME_COUNT))
-                    media_duration = frame_count / fps
+                    medias_duration += frame_count / fps
                 case "audio":
                     media_file = AudioFileClip(file_path)
-                    media_duration = media_file.duration
-    return media_duration
+                    medias_duration += media_file.duration
+
+    return medias_duration
 
 
 def get_all_media_sent_messages(messages):
@@ -61,8 +63,9 @@ def get_all_media_sent_messages(messages):
 
 def count_media_sent_by_participants(all_media_sent_messages, media_sender):
     for message in all_media_sent_messages:
-        sender_name = message["sender_name"]
-        media_sender[message["sender_name"]] = media_sender.get(sender_name, 0) + 1
+        for media_type in MEDIA_TYPES:
+            if message.get(media_type):
+                media_sender[message["sender_name"]] += len(message.get(media_type))
 
     media_sender = dict(
         sorted(media_sender.items(), key=lambda item: item[1], reverse=True)
@@ -157,6 +160,7 @@ def get_file_size_of_media(all_media_sent_messages, participants):
                     media_disk_space[message["sender_name"]][media_type][
                         "b"
                     ] += file_size
+
     # Remove empty values, could probably reuse this code...
     for participant_key, media_keys in media_disk_space.items():
         for media_type in list(media_keys.keys()):

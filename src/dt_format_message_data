@@ -16,7 +16,7 @@ def main(dirs_to_format):
                 if re.search("^message.*?.json$", file):
                     json_data = load_json(os.path.join(full_path, file))
                     orignal_title = json_data.get("title")
-                    json_data["title"] = encode_string(orignal_title)
+                    json_data["title"] = encode_string(string=orignal_title)
                     for message in json_data["messages"]:
                         message = process_message_data(message)
                     print(f'{orignal_title} becomes {json_data.get("title")}')

@@ -5,7 +5,7 @@
 # export PYENCHANT_LIBRARY_PATH=/opt/homebrew/lib/libenchant-2.dylib
 
 import argparse
-import datetime
+from datetime import datetime
 import os
 from string import punctuation
 
@@ -14,7 +14,13 @@ import nltk
 from emoji import emojize, is_emoji
 from nltk.corpus import stopwords
 
-from utils import encode_string, get_data_to_parse, initial_file_load, write_to_file
+from utils import (
+    encode_string,
+    get_data_to_parse,
+    initial_file_load,
+    initialise_counter_dict,
+    write_to_file,
+)
 
 d = enchant.Dict("en_GB")
 nltk.download("wordnet")
@@ -26,7 +32,7 @@ SAVE_INVALID_WORDS = False
 REFERRAL_LINKS = ["share.octopus.energy", "trading212.com/invite", "join.monzo.com"]
 
 
-def verified_word(word):
+def verified_word(word, emojis_only):
     # Check for http in word
     if "http" in word:
         invalid_words.append(word)
@@ -36,9 +42,11 @@ def verified_word(word):
         invalid_words.append(word)
         return None
     # Check if the word is an emoji
-    if is_emoji(emojize(word)):
+    if not emojis_only and is_emoji(emojize(word)):
         invalid_words.append(word)
         return None
+    elif emojis_only and is_emoji(emojize(word)):
+        return word
 
     # Check if the word without punctuation still has a value
     if len(word.strip(punctuation)) > 0:
@@ -80,6 +88,16 @@ def list_every_word(all_messages, emojis_only):
     return list(all_words)
 
 
+def get_morning_strawbs(message):
+    if message.get("content") == ":strawberry:":
+        date_time = datetime.strptime(
+            message.get("timestamp_converted"), "%Y-%m-%d %H:%M:%S"
+        )
+        if date_time.time().hour < 11:
+            return True
+        return False
+
+
 def main(
     *,
     data_to_parse,
@@ -96,7 +114,7 @@ def main(
         messages, _ = get_data_to_parse(
             data_to_parse, "-".join([str(today.year), "01"]), None
         )
-        all_messages, _ = get_data_to_parse(
+        all_messages, participants = get_data_to_parse(
             data_to_parse,
             None,
             "-".join([str(today.year - 1), "12"]),
@@ -104,18 +122,21 @@ def main(
         all_previous_years_words = list_every_word(all_messages, emojis_only)
 
     else:
-        messages, _ = get_data_to_parse(data_to_parse, date_range_start, date_range_end)
+        messages, participants = get_data_to_parse(
+            data_to_parse, date_range_start, date_range_end
+        )
 
     word_data = {}
     sender_count = {}
+    morning_strawbs = initialise_counter_dict(participants)
 
     messages.reverse()
     for message in messages:
+        sender_name = message.get("sender_name", "")
         try:
             words = message.get("content", "").lower().split(" ")
-            sender_name = message.get("sender_name", "")
             for word in words:
-                formatted_word = verified_word(word)
+                formatted_word = verified_word(word, emojis_only)
                 if (
                     emoji_or_noji(formatted_word, emojis_only)
                     and formatted_word not in all_previous_years_words
@@ -133,13 +154,14 @@ def main(
                                 "content", ""
                             )
                         sender_count[sender_name] = sender_count.get(sender_name, 0) + 1
-
         except KeyError:
             continue
+        morning_strawbs[sender_name] += 1 if get_morning_strawbs(message) else 0
 
     sorted_word_data = dict(
         sorted(word_data.items(), key=lambda item: item[1]["count"], reverse=True)
     )
+    sorted_word_data["morning_strawbs"] = morning_strawbs
     sorted_sender_count = dict(sorted(sender_count.items(), key=lambda item: item[1]))
 
     sorted_word_data["sender_count"] = sorted_sender_count

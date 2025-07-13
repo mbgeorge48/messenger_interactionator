@@ -171,7 +171,10 @@ def who_didnt_react(reacted_message, participants):
     reactors = participants.copy()
     for reaction in reacted_message.get("reactions", ""):
         actor = reaction.get("actor", "")
-        reactors.remove(actor)
+        try:
+            reactors.remove(actor)
+        except ValueError:
+            print(actor)
     return reactors
 
 
@@ -219,7 +222,7 @@ def get_average_message_reactions(all_messages):
 
     for participant in message_ratio_dict:
         message_ratio_dict[participant]["percentage"] = (
-            message_ratio_dict[participant]["reacted"]
+            message_ratio_dict[participant].get("reacted", 0)
             / message_ratio_dict[participant]["message"]
         ) * 100
 
@@ -354,7 +357,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--averagereacts",
         type=bool,
-        default=False,
+        default=True,
         help="How many reacts does a participant get on average",
     )
 
